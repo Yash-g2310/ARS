@@ -4,7 +4,7 @@ from django.utils import timezone
 # Create your models here.
 
 
-class Spaces(models.Model):
+class Space(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     space_name = models.CharField(max_length=50)
     space_bio = models.CharField(max_length=150)
@@ -17,10 +17,10 @@ class Spaces(models.Model):
     def __str__(self) :
         return self.space_name
     
-class SubSpaces(models.Model):
-    space = models.ForeignKey(Spaces, on_delete=models.CASCADE)
-    SubSpace_name = models.CharField(max_length=50)
-    SubSpace_bio = models.CharField(max_length= 150)
+class SubSpace(models.Model):
+    space = models.ForeignKey(Space, on_delete=models.CASCADE)
+    sub_space_name = models.CharField(max_length=50)
+    sub_space_bio = models.CharField(max_length= 150)
     create_date = models.DateField(default= timezone.now)
     reviewer_count = models.IntegerField(default=0)
     reviewee_count = models.IntegerField(default=0) 
@@ -28,29 +28,29 @@ class SubSpaces(models.Model):
     # subspace_logo
     
     def __str__(self) :
-        return self.SubSpace_name
+        return self.sub_space_name
 
 
-class SpaceMembers:
-    space = models.ForeignKey(Spaces, on_delete=models.CASCADE)
+class SpaceMember(models.Model):
+    space = models.ForeignKey(Space, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    join_date = models.DateField(timezone.now)
+    join_date = models.DateField(default=timezone.now)
 
-class SubSpaceMembers:
+class SubSpaceMember(models.Model):
     REVIEWEE = 'reviewee'
     REVIEWER = 'reviewer'
     ROLE_CHOICES = [
         ('reviewer','Reviewer'),
         ('reviewee','Reviewee'),
     ]
-    spaceMember = models.ForeignKey(SpaceMembers,on_delete=models.CASCADE)
-    sub_space = models.ForeignObject(SubSpaces,on_delete=models.CASCADE)
+    spaceMember = models.ForeignKey(SpaceMember,on_delete=models.CASCADE)
+    sub_space = models.ForeignKey(SubSpace,on_delete=models.CASCADE)
     join_date = models.DateField(default=timezone.now)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES,default=REVIEWEE)
     
-class Group:
-    space = models.ForeignKey(Spaces,on_delete=models.CASCADE,null=True)
-    subspace = models.ForeignKey(SubSpaces,on_delete=models.CASCADE,null=True)
+class Group(models.Model):
+    space = models.ForeignKey(Space,on_delete=models.CASCADE,null=True)
+    sub_space = models.ForeignKey(SubSpace,on_delete=models.CASCADE,null=True)
     group_name = models.CharField(max_length=50)
     create_date = models.DateField(default=timezone.now)
     member_count =models.IntegerField(default=0)
@@ -59,7 +59,7 @@ class Group:
     def __str__(self):
         return self.group_name
 
-class GroupMember:
+class GroupMember(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     join_date = models.DateField(default=timezone.now)
