@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'spaces',
     'submissions',
     'users',
+    'attachments',
     'phonenumber_field',
 ]
 
