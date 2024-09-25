@@ -7,11 +7,10 @@ class Assignment(models.Model):
     uploader = models.ForeignKey(SubSpaceMember, on_delete=models.SET_NULL,null=True)
     sub_space =  models.ForeignKey(SubSpace, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
-    description = models.CharField(max_length=250)
-    upload_date = models.DateField(default=timezone.now)
-    iteration_date = models.DateField(null=True,blank=True)
-    due_date = models.DateField(null=True,blank=True)
-    # subtaskCount = models.IntegerField(default=0)
+    description = models.TextField(null=False)
+    upload_date = models.DateTimeField(default=timezone.now)
+    iteration_date = models.DateTimeField(null=True,blank=True)
+    due_date = models.DateTimeField(null=True,blank=True)
     
     @property
     def subtask_count(self):
@@ -21,7 +20,7 @@ class Assignment(models.Model):
 class AssignmentDetails(models.Model):
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
-    description = models.CharField(max_length=500,null = True,blank=True)
+    description = models.TextField(null = True,blank=True)
 
 class AssignmentSubtask(models.Model):
     COMPULSORY = 'compulsory'
@@ -34,7 +33,7 @@ class AssignmentSubtask(models.Model):
     ]
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
-    description = models.CharField(max_length=350,null = True,blank=True)
+    description = models.TextField(null = True,blank=True)
     tag = models.CharField(max_length=20,choices=SUBTASK_TAGS,default=OPTIONAL)
 
 class AssignmentReviewer(models.Model):
@@ -52,7 +51,6 @@ class AssignmentReviewee(models.Model):
     ]
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
     reviewee = models.ForeignKey(SubSpaceMember,on_delete=models.CASCADE)
-    # submission_count = models.IntegerField(default=0)
     reviewee_status = models.CharField(max_length=20, choices=REVIEWEE_STATUS_LIST,default=NOT_SUBMITTED)
     
     @property
@@ -62,8 +60,6 @@ class AssignmentReviewee(models.Model):
 class AssignmentTeam(models.Model):
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
     team_name = models.CharField(max_length=50)
-    # member_count = models.IntegerField(default=0)
-    # submission_count = models.IntegerField(default=0)
     
     @property
     def member_count(self):

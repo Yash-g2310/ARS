@@ -16,12 +16,12 @@ class AssignmentSubmission(models.Model):
     ]
     assignment_reviewee = models.ForeignKey(AssignmentReviewee,on_delete=models.SET_NULL, null=True)
     assignment_team = models.ForeignKey(AssignmentTeam,on_delete=models.SET_NULL,null=True)
-    submitted_at = models.DateField(default=timezone.now)
+    submitted_at = models.DateTimeField(default=timezone.now)
     assignment_reviewer = models.ForeignKey(AssignmentReviewer,on_delete=models.SET_NULL,null=True)
-    reviewed_at = models.DateField(blank=True,null=True)
+    reviewed_at = models.DateTimeField(blank=True,null=True)
     status = models.CharField(max_length=25,choices=ASSIGNMENT_SUBMISSION_STATUS,default=NOT_STARTED)
-    reviewee_comment = models.CharField(max_length=250,null=True,blank=True)
-    reviewer_comment = models.CharField(max_length=250,null=True,blank=True)
+    reviewee_comment = models.TextField(null=True,blank=True)
+    reviewer_comment = models.TextField(null=True,blank=True)
     
 class SubtaskStatus(models.Model):
     COMPLETED = "completed"
@@ -37,5 +37,5 @@ class SubtaskStatus(models.Model):
 class SubtaskSubmission(models.Model):
     assignment_submission = models.ForeignKey(AssignmentSubmission,on_delete=models.CASCADE)
     assignment_subtask = models.ForeignKey(AssignmentSubtask, on_delete=models.CASCADE)
-    reviewee_comment = models.CharField(max_length=250,null=True,blank=True)
+    reviewee_comment = models.TextField(null=True,blank=True)
 
