@@ -33,9 +33,14 @@ class SubtaskStatus(models.Model):
     assignment_reviewee = models.ForeignKey(AssignmentReviewee,on_delete=models.CASCADE)
     assignment_subtask = models.ForeignKey(AssignmentSubtask,on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=ASSIGNMENT_SUBTASK_STATUS)
+    
+    class Meta:
+        unique_together = [('assignment_reviewee','assignment_subtask')]    
 
 class SubtaskSubmission(models.Model):
     assignment_submission = models.ForeignKey(AssignmentSubmission,on_delete=models.CASCADE)
     assignment_subtask = models.ForeignKey(AssignmentSubtask, on_delete=models.CASCADE)
     reviewee_comment = models.TextField(null=True,blank=True)
 
+    class Meta:
+        unique_together = [('assignment_submission','assignment_subtask')]    

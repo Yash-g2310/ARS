@@ -1,6 +1,7 @@
 from django.db import models
 from spaces.models import SubSpaceMember,SubSpace
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 # Create your models here.
 
 class Assignment(models.Model):
@@ -39,6 +40,9 @@ class AssignmentSubtask(models.Model):
 class AssignmentReviewer(models.Model):
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
     reviewer = models.ForeignKey(SubSpaceMember,on_delete=models.CASCADE)
+    
+    class Meta:
+        unique_together = [('assignment','reviewer')]
 
 class AssignmentReviewee(models.Model):
     SUBMITTED = 'submitted'
@@ -57,6 +61,9 @@ class AssignmentReviewee(models.Model):
     def submission_count(self):
         return self.assignmentsubmission_set.count()
 
+    class Meta:
+        unique_together = [('assignment','reviewee')]
+        
 class AssignmentTeam(models.Model):
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
     team_name = models.CharField(max_length=50)
@@ -72,3 +79,11 @@ class AssignmentTeam(models.Model):
 class TeamMember(models.Model):
     team = models.ForeignKey(AssignmentTeam,on_delete=models.CASCADE)
     member = models.ForeignKey(SubSpaceMember,on_delete=models.CASCADE)
+    
+    def save(self, *args, **kwargs):
+        if self.member.role != 'reviewee':
+            raise ValidationError(f"{self.member} is not a reviewee!")
+        return super().save(*args, **kwargs)
+    
+    class Meta:
+        unique_together = [('team','member')]

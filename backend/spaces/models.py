@@ -49,6 +49,9 @@ class SpaceMember(models.Model):
     space = models.ForeignKey(Space, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     join_date = models.DateField(default=timezone.now)
+    
+    class Meta:
+        unique_together = [('space','user')]
 
 class SubSpaceMember(models.Model):
     REVIEWEE = 'reviewee'
@@ -57,11 +60,14 @@ class SubSpaceMember(models.Model):
         ('reviewer','Reviewer'),
         ('reviewee','Reviewee'),
     ]
-    spaceMember = models.ForeignKey(SpaceMember,on_delete=models.CASCADE)
+    space_member = models.ForeignKey(SpaceMember,on_delete=models.CASCADE)
     sub_space = models.ForeignKey(SubSpace,on_delete=models.CASCADE)
     join_date = models.DateField(default=timezone.now)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES,default=REVIEWEE)
     
+    class Meta:
+        unique_together = [('space_member','sub_space')]
+        
 class Group(models.Model):
     space = models.ForeignKey(Space,on_delete=models.CASCADE,null=True)
     sub_space = models.ForeignKey(SubSpace,on_delete=models.CASCADE,null=True)
@@ -79,3 +85,6 @@ class GroupMember(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     join_date = models.DateField(default=timezone.now)
+    
+    class Meta:
+        unique_together = [('group','user')]
