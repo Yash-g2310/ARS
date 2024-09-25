@@ -9,6 +9,8 @@ class Assignment(models.Model):
     title = models.CharField(max_length=50)
     description = models.CharField(max_length=250)
     upload_date = models.DateField(default=timezone.now)
+    iteration_date = models.DateField(null=True,blank=True)
+    due_date = models.DateField(null=True,blank=True)
     # subtaskCount = models.IntegerField(default=0)
     
     @property
@@ -61,11 +63,15 @@ class AssignmentTeam(models.Model):
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
     team_name = models.CharField(max_length=50)
     # member_count = models.IntegerField(default=0)
-    submission_count = models.IntegerField(default=0)
+    # submission_count = models.IntegerField(default=0)
     
     @property
     def member_count(self):
         return self.teammember_set.count()
+    
+    @property
+    def submission_count(self):
+        return self.assignmentsubmission_set.count()
 
 class TeamMember(models.Model):
     team = models.ForeignKey(AssignmentTeam,on_delete=models.CASCADE)
