@@ -3,13 +3,18 @@ from users.models import UserProfile
 from django.contrib.auth.models import User
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(source = 'user.first_name',required = True)
-    last_name = serializers.CharField(source = 'user.last_name',required = True)
+    first_name = serializers.CharField( required=True)
+    last_name = serializers.CharField(required=True)
+    username = serializers.CharField( required=True,read_only = True)
+    email = serializers.EmailField(required=True,read_only = True)
     class Meta:
         model = UserProfile 
         fields = [
+            'id',
             'first_name',
             'last_name',
+            'username',
+            'email',
             'user_bio',
             'phone_number',
             'profile_image',
@@ -56,5 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
+        user_profile=UserProfile(user=user)
+        user_profile.save()
         return user
-    
+
