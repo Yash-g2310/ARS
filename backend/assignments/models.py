@@ -12,6 +12,7 @@ class Assignment(models.Model):
     upload_date = models.DateTimeField(default=timezone.now)
     iteration_date = models.DateTimeField(null=True,blank=True)
     due_date = models.DateTimeField(null=True,blank=True)
+    updated_at = models.DateTimeField(null=True,blank=True)
     
     @property
     def subtask_count(self):

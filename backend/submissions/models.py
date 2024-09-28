@@ -16,7 +16,7 @@ class AssignmentSubmission(models.Model):
     ]
     assignment_reviewee = models.ForeignKey(AssignmentReviewee,on_delete=models.SET_NULL, null=True)
     assignment_team = models.ForeignKey(AssignmentTeam,on_delete=models.SET_NULL,null=True)
-    submitted_at = models.DateTimeField(default=timezone.now)
+    submitted_at = models.DateTimeField(auto_now_add=True)
     assignment_reviewer = models.ForeignKey(AssignmentReviewer,on_delete=models.SET_NULL,null=True)
     reviewed_at = models.DateTimeField(blank=True,null=True)
     status = models.CharField(max_length=25,choices=ASSIGNMENT_SUBMISSION_STATUS,default=NOT_STARTED)
