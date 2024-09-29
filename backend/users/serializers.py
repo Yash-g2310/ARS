@@ -5,8 +5,8 @@ from django.contrib.auth.models import User
 class UserProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField( required=True)
     last_name = serializers.CharField(required=True)
-    username = serializers.CharField( required=True,read_only = True)
-    email = serializers.EmailField(required=True,read_only = True)
+    username = serializers.CharField(read_only = True)
+    email = serializers.EmailField(read_only = True)
     class Meta:
         model = UserProfile 
         fields = [
@@ -23,6 +23,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'enrollment_no',
         ]
         
+
+class RestrictedUserProfileSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField( required=True)
+    last_name = serializers.CharField(required=True)
+    username = serializers.CharField( read_only = True)
+    class Meta:
+        model = UserProfile 
+        fields = [
+            'first_name',
+            'last_name',
+            'username',
+            'user_bio',
+            'profile_image',
+            'background_image',
+            'department',
+            'enrollment_no',
+        ]
 
 class UserSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only = True)

@@ -6,12 +6,13 @@ from rest_framework import status
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from .serializers import UserSerializer, UserProfileSerializer
+from .serializers import UserSerializer, UserProfileSerializer,RestrictedUserProfileSerializer
 from .models import UserProfile
+from .permissions import IsOwnerOrReadOnly,IsNotAuthenticated
 # Create your views here.
 
 class LoginView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsNotAuthenticated]
     
     def post(self, request):
         username = request.data.get('username')
@@ -30,20 +31,21 @@ class LogoutView(APIView):
         return Response({'message': 'Logout successful!'}, status=status.HTTP_200_OK) 
 
 class UserRegistrationView(generics.CreateAPIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsNotAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class UserProfileDetailView(generics.RetrieveAPIView):
+class UserProfileDetailView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserProfileSerializer
+    # serializer_class = UserProfileSerializer
     lookup_field = 'username'
+    permission_classes = [IsOwnerOrReadOnly]
+    
     def get_object(self):
         return super().get_object()
     
-# class UserProfileUpdateView(generics.UpdateAPIView):
-#     queryset = UserProfile.objects.all()
-#     serializer_class = UserProfileSerializer
-#     lookup_field = 'username'
-#     def 
+    def get_serializer_class(self):
+        if self.request.user == self.get_object():
+            return UserProfileSerializer
+        return RestrictedUserProfileSerializer
 
