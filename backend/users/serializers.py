@@ -3,10 +3,10 @@ from users.models import UserProfile
 from django.contrib.auth.models import User
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField( required=True)
-    last_name = serializers.CharField(required=True)
-    username = serializers.CharField(read_only = True)
-    email = serializers.EmailField(read_only = True)
+    first_name = serializers.CharField(source='user.first_name', required=True)
+    last_name = serializers.CharField(source='user.last_name', required=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
     class Meta:
         model = UserProfile 
         fields = [
@@ -25,9 +25,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         
 
 class RestrictedUserProfileSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField( required=True)
-    last_name = serializers.CharField(required=True)
-    username = serializers.CharField( read_only = True)
+    first_name = serializers.CharField(source='user.first_name', required=True)
+    last_name = serializers.CharField(source='user.last_name', required=True)
+    username = serializers.CharField(source='user.username', read_only=True)
     class Meta:
         model = UserProfile 
         fields = [

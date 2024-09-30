@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate,login,logout
 from .serializers import UserSerializer, UserProfileSerializer,RestrictedUserProfileSerializer,ChangePasswordSerializer,ChangeUsernameSerializer
 from .models import UserProfile
 from .permissions import IsOwnerOrReadOnly,IsNotAuthenticated,IsOwnerOrForbidden
+from .utility import getUserInfo
 from constants.constants import AUTH_URL,CLIENT_ID,REDIRECT_URI,CLIENT_SECRET,AUTH_POST_URL,USER_DATA_URL
 # Create your views here.
 
@@ -46,24 +47,24 @@ class UserRegistrationView(generics.CreateAPIView):
 #     search_fields = ['username','first_name','last_name','email']
 
 class UserProfileDetailView(generics.RetrieveUpdateAPIView):
-    queryset = User.objects.all()
+    queryset = UserProfile.objects.all()
     # serializer_class = UserProfileSerializer
-    lookup_field = 'username'
+    lookup_field = 'user__username'
     permission_classes = [IsOwnerOrReadOnly]
+    def get_serializer_class(self):
+        user = self.request.user
+        if self.request.user == self.get_object():
+            return UserProfileSerializer
+        return RestrictedUserProfileSerializer
     
     def get_object(self):
         return super().get_object()
     
-    def get_serializer_class(self):
-        if self.request.user == self.get_object():
-            return UserProfileSerializer
-        return RestrictedUserProfileSerializer
 
 class ChanneliTokenView(APIView):
     permission_classes = [IsNotAuthenticated]
     def get(self, request,*args, **kwargs):
         REDIRECT_URL = f"{AUTH_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
-        print(REDIRECT_URL)
         return redirect(REDIRECT_URL)
     
 
@@ -83,7 +84,6 @@ class ChanneliTokenRecall(APIView):
         }
         
         try:
-            print()
             res = requests.post(AUTH_POST_URL,data = token_data)
             res.raise_for_status()
         except requests.exceptions.RequestException as e:
@@ -104,7 +104,17 @@ class ChanneliTokenRecall(APIView):
         data = res.json()
         if data.get('detail',None) is not None:
             return Response(data,status=res.status_code)
-        return Response(data,status=status.HTTP_200_OK)
+        user = getUserInfo(data)
+
+        if user ==None:
+            return Response({'error':'problem in getting credintials'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        try:
+            login(request,user)
+            # return Response({"detail":"logged in successfully"},status=status.HTTP_200_OK)
+            return redirect(f"http://localhost:8000/{user.username}/profile/")
+        except:
+            return Response({'error':'Invalide credintials'},status=status.HTTP_400_BAD_REQUEST)
+        
 
 class ChangePasswordView(APIView):
     permission_classes = [IsOwnerOrForbidden]
