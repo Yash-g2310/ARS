@@ -8,9 +8,9 @@ from rest_framework import filters
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from .serializers import UserSerializer, UserProfileSerializer,RestrictedUserProfileSerializer
+from .serializers import UserSerializer, UserProfileSerializer,RestrictedUserProfileSerializer,ChangePasswordSerializer,ChangeUsernameSerializer
 from .models import UserProfile
-from .permissions import IsOwnerOrReadOnly,IsNotAuthenticated
+from .permissions import IsOwnerOrReadOnly,IsNotAuthenticated,IsOwnerOrForbidden
 from constants.constants import AUTH_URL,CLIENT_ID,REDIRECT_URI,CLIENT_SECRET,AUTH_POST_URL,USER_DATA_URL
 # Create your views here.
 
@@ -63,6 +63,7 @@ class ChanneliTokenView(APIView):
     permission_classes = [IsNotAuthenticated]
     def get(self, request,*args, **kwargs):
         REDIRECT_URL = f"{AUTH_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
+        print(REDIRECT_URL)
         return redirect(REDIRECT_URL)
     
 
@@ -82,6 +83,7 @@ class ChanneliTokenRecall(APIView):
         }
         
         try:
+            print()
             res = requests.post(AUTH_POST_URL,data = token_data)
             res.raise_for_status()
         except requests.exceptions.RequestException as e:
@@ -103,3 +105,23 @@ class ChanneliTokenRecall(APIView):
         if data.get('detail',None) is not None:
             return Response(data,status=res.status_code)
         return Response(data,status=status.HTTP_200_OK)
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsOwnerOrForbidden]
+    def post(self,request,*args, **kwargs):
+        serializer = ChangePasswordSerializer(data = request.data,context = {"request":request})
+        serializer.is_valid(raise_exception  = True)
+        user = request.user
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response({"detail":"Password updated successfully"},status=status.HTTP_200_OK)
+
+class ChangeUsernameView(APIView):
+    permission_classes = [IsOwnerOrForbidden]
+    def post(self,request,*args, **kwargs):
+        serializer = ChangeUsernameSerializer(data = request.data,context = {"request":request})
+        serializer.is_valid(raise_exception  = True)
+        user = request.user
+        user.username = serializer.validated_data['new_username']
+        user.save()
+        return Response({"detail":"Username updated successfully"},status=status.HTTP_200_OK)

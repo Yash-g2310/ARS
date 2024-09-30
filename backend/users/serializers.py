@@ -82,3 +82,31 @@ class UserSerializer(serializers.ModelSerializer):
         user_profile.save()
         return user
 
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required = True, write_only = True)
+    new_password = serializers.CharField(required = True, write_only = True)
+    confirm_password = serializers.CharField(required = True, write_only = True)
+    
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError("new password doesn't match")
+        if attrs['new_password'] == attrs['old_password']:
+            raise serializers.ValidationError("new and old passwords must be different")
+        return attrs
+
+    def validate_old_password(self,val):
+        user = self.context['request'].user
+        if not user.check_password(val):
+            raise serializers.ValidationError("old password is incorrect")
+        return val
+
+class ChangeUsernameSerializer(serializers.Serializer):
+    new_username = serializers.CharField(required = True, write_only = True)
+
+    def validate_new_username(self,val):
+        user = self.context['request'].user
+        if user.username == val:
+            raise serializers.ValidationError("new username can not be same as old one")
+        if User.objects.filter(username = val).exists():
+            raise serializers.ValidationError("user with same username already exist, please try again")
+        return val
