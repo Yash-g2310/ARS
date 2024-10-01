@@ -7,6 +7,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='user.last_name', required=True)
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
+    # enrollment_no = serializers.CharField(read_only = True)
+    # department = serializers.CharField(read_only = True)
     class Meta:
         model = UserProfile 
         fields = [
@@ -22,7 +24,28 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'department',
             'enrollment_no',
         ]
-        
+    def __init__(self, instance=None, *args, **kwargs):
+        super().__init__(instance, *args, **kwargs)
+        request = self.context.get('request')
+        if request and request.method in ['PUT','PATCH']:
+            self.fields.pop('enrollment_no',None)
+            self.fields.pop('department',None)
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.get('user',None)
+        if user_data:
+            instance.user.first_name = user_data.get('first_name',instance.user.first_name)
+            instance.user.last_name = user_data.get('last_name',instance.user.last_name)
+        instance.user_bio=validated_data.get('user_bio')
+        instance.phone_number=validated_data.get('phone_number')
+        instance.profile_image=validated_data.get('profile_image')
+        instance.background_image=validated_data.get('background_image')
+        validated_data.pop('enrollment_no',None)
+        validated_data.pop('department',None)
+        instance.user.save()
+        instance.save()
+        return instance
+
 
 class RestrictedUserProfileSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source='user.first_name', required=True)
@@ -96,6 +119,8 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate_old_password(self,val):
         user = self.context['request'].user
+        if not user.has_usable_password():
+            return val
         if not user.check_password(val):
             raise serializers.ValidationError("old password is incorrect")
         return val

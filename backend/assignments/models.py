@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 class Assignment(models.Model):
     uploader = models.ForeignKey(SubSpaceMember, on_delete=models.SET_NULL,null=True)
     sub_space =  models.ForeignKey(SubSpace, on_delete=models.CASCADE)
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=150)
     description = models.TextField(null=False)
     upload_date = models.DateTimeField(default=timezone.now)
     iteration_date = models.DateTimeField(null=True,blank=True)
@@ -21,7 +21,7 @@ class Assignment(models.Model):
 
 class AssignmentDetails(models.Model):
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=150)
     description = models.TextField(null = True,blank=True)
 
 class AssignmentSubtask(models.Model):
@@ -34,9 +34,9 @@ class AssignmentSubtask(models.Model):
         (BROWNIE,'Brownie_Points'),
     ]
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=150)
     description = models.TextField(null = True,blank=True)
-    tag = models.CharField(max_length=20,choices=SUBTASK_TAGS,default=OPTIONAL)
+    tag = models.CharField(max_length=50,choices=SUBTASK_TAGS,default=OPTIONAL)
 
 class AssignmentReviewer(models.Model):
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
@@ -56,7 +56,7 @@ class AssignmentReviewee(models.Model):
     ]
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
     reviewee = models.ForeignKey(SubSpaceMember,on_delete=models.CASCADE)
-    reviewee_status = models.CharField(max_length=20, choices=REVIEWEE_STATUS_LIST,default=NOT_SUBMITTED)
+    reviewee_status = models.CharField(max_length=40, choices=REVIEWEE_STATUS_LIST,default=NOT_SUBMITTED)
     
     @property
     def submission_count(self):
@@ -67,7 +67,7 @@ class AssignmentReviewee(models.Model):
         
 class AssignmentTeam(models.Model):
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
-    team_name = models.CharField(max_length=50)
+    team_name = models.CharField(max_length=150)
     
     @property
     def member_count(self):

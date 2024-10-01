@@ -11,34 +11,42 @@ def getUserInfo(data):
         dp = data['person']['displayPicture']
         enroll = data['facultyMember'].get('employeeId') if data['student'].get('enrolmentNumber') is None else data['student'].get('enrolmentNumber')
         department =data['facultyMember'].get('department name') if data['student'].get('branch department name') is None else data['student'].get('branch department name')
-        
-        user,flag = User.objects.get_or_create(
-            username = username,
-            defaults={
-                'email': email,
-                'first_name': first_name,
-                'last_name': last_name,
-            }
-        )
-        if(user==None): return None
-        if flag:
-            user_profile = UserProfile.objects.create(
+    except Exception as e: 
+        return {"error":"problem in fetching values form json","error message":e}
+    
+    try:
+        user_profile = UserProfile.objects.filter(enrollment_no=enroll).first()
+    except Exception as e:
+        return {"error": "problem in getting user profile", "error message": str(e)}
+    
+    if user_profile is None:
+        try:
+            user= User.objects.create(
+                username = username,
+                email= email,
+                first_name= first_name,
+                last_name= last_name,
+            )
+            user.set_unusable_password()
+            print(user.has_usable_password())
+            user.save()
+        except Exception as e:
+            return {"error": "problem in creating new user instance", "error message": str(e)}
+
+        try:
+            user_profile_new = UserProfile.objects.create(
                 user=user,
                 profile_image=dp,
                 department=department,
                 enrollment_no=enroll
             )
-        else:
-            user_profile = UserProfile.objects.get(user=user)
-        if user_profile.enrollment_no==None:
-            user_profile.enrollment_no = enroll
-        if user_profile.department==None:
-            user_profile.department = department
-        if user_profile.profile_image==None:
-            user_profile.profile_image = dp
-        user_profile.save()
-        user.save()
+            user_profile_new.save()
+        except Exception as e:
+            return {"error": "problem in creating new instance of user profile", "error message": str(e)}
         return user
-    except:
-        return None
+    
+    user = user_profile.user
+    if user is None:
+        return {"error":"user profile exist but user not"}
+    return user
     

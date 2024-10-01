@@ -8,7 +8,6 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 class IsOwnerOrForbidden(permissions.BasePermission):
     def has_permission(self, request, view):
-        print(request.method,view.kwargs['username'],request.user.username)
         if view.kwargs['username']==request.user.username:
             return True
         return False

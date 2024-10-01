@@ -19,7 +19,7 @@ class AssignmentSubmission(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     assignment_reviewer = models.ForeignKey(AssignmentReviewer,on_delete=models.SET_NULL,null=True)
     reviewed_at = models.DateTimeField(blank=True,null=True)
-    status = models.CharField(max_length=25,choices=ASSIGNMENT_SUBMISSION_STATUS,default=NOT_STARTED)
+    status = models.CharField(max_length=50,choices=ASSIGNMENT_SUBMISSION_STATUS,default=NOT_STARTED)
     reviewee_comment = models.TextField(null=True,blank=True)
     reviewer_comment = models.TextField(null=True,blank=True)
     
@@ -32,7 +32,7 @@ class SubtaskStatus(models.Model):
     ]
     assignment_reviewee = models.ForeignKey(AssignmentReviewee,on_delete=models.CASCADE)
     assignment_subtask = models.ForeignKey(AssignmentSubtask,on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=ASSIGNMENT_SUBTASK_STATUS)
+    status = models.CharField(max_length=50, choices=ASSIGNMENT_SUBTASK_STATUS)
     
     class Meta:
         unique_together = [('assignment_reviewee','assignment_subtask')]    

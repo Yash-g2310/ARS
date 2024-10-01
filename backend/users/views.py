@@ -53,7 +53,7 @@ class UserProfileDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
     def get_serializer_class(self):
         user = self.request.user
-        if self.request.user == self.get_object():
+        if self.request.user == self.get_object().user:
             return UserProfileSerializer
         return RestrictedUserProfileSerializer
     
@@ -96,6 +96,7 @@ class ChanneliTokenRecall(APIView):
         TOKEN_TYPE = data.get('token_type')
         ACCESS_TOKEN = data.get('access_token')
         header = {'Authorization': f"{TOKEN_TYPE} {ACCESS_TOKEN}"}
+        
         try:
             res = requests.get(USER_DATA_URL,headers=header)
             res.raise_for_status()
@@ -106,14 +107,16 @@ class ChanneliTokenRecall(APIView):
             return Response(data,status=res.status_code)
         user = getUserInfo(data)
 
-        if user ==None:
-            return Response({'error':'problem in getting credintials'},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if type(user)==dict:
+            return Response(user,status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if user == None:
+            return Response({"error":"user_profile don't exist but user do"})
         try:
             login(request,user)
             # return Response({"detail":"logged in successfully"},status=status.HTTP_200_OK)
             return redirect(f"http://localhost:8000/{user.username}/profile/")
         except:
-            return Response({'error':'Invalide credintials'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error':'unable to log you in'},status=status.HTTP_400_BAD_REQUEST)
         
 
 class ChangePasswordView(APIView):

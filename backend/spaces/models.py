@@ -6,8 +6,8 @@ from django.utils import timezone
 
 class Space(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    space_name = models.CharField(max_length=50)
-    space_bio = models.CharField(max_length=250)
+    space_name = models.CharField(max_length=100)
+    space_bio = models.TextField(blank=True,null=True)
     create_date = models.DateTimeField(auto_now_add=True)
     space_profile = models.ImageField(upload_to='space_profile/',null=True, blank=True)
     space_background = models.ImageField(upload_to='space_background/',null=True, blank=True)
@@ -25,8 +25,8 @@ class Space(models.Model):
     
 class SubSpace(models.Model):
     space = models.ForeignKey(Space, on_delete=models.CASCADE)
-    sub_space_name = models.CharField(max_length=50)
-    sub_space_bio = models.CharField(max_length= 250)
+    sub_space_name = models.CharField(max_length=100)
+    sub_space_bio = models.TextField(blank=True,null=True)
     create_date = models.DateField(auto_now_add=True)
     
     def __str__(self) :
@@ -63,7 +63,7 @@ class SubSpaceMember(models.Model):
     space_member = models.ForeignKey(SpaceMember,on_delete=models.CASCADE)
     sub_space = models.ForeignKey(SubSpace,on_delete=models.CASCADE)
     join_date = models.DateField(auto_now_add=True)
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES,default=REVIEWEE)
+    role = models.CharField(max_length=30, choices=ROLE_CHOICES,default=REVIEWEE)
     
     class Meta:
         unique_together = [('space_member','sub_space')]
@@ -71,7 +71,7 @@ class SubSpaceMember(models.Model):
 class Group(models.Model):
     space = models.ForeignKey(Space,on_delete=models.CASCADE,null=True)
     sub_space = models.ForeignKey(SubSpace,on_delete=models.CASCADE,null=True)
-    group_name = models.CharField(max_length=50)
+    group_name = models.CharField(max_length=100)
     create_date = models.DateField(auto_now_add=True)
     
     def __str__(self):
