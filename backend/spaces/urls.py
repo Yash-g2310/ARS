@@ -5,6 +5,6 @@ from . import views
 
 urlpatterns = [
     path('',views.SpaceListView.as_view(),name='space_dashboard'),
+    path('create-space/',views.SpaceCreateView.as_view(), name= 'space_creation'),
     path('<int:pk>/details/',views.SpaceDetailView.as_view(), name= 'space_details'),
-    path('create-space/',views.SpaceCreateView.as_view(), name= 'space_creation')
 ]

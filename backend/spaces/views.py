@@ -16,7 +16,7 @@ class SpaceCreateView(generics.CreateAPIView):
     queryset = Space.objects.all()
     serializer_class = SpaceCreateDetailSerializer
 
-class SpaceDetailView(generics.RetrieveAPIView):
+class SpaceDetailView(generics.RetrieveUpdateAPIView):
     queryset = Space.objects.all()
     serializer_class = SpaceCreateDetailSerializer
     lookup_field = 'pk'

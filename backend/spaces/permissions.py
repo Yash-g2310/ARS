@@ -12,5 +12,7 @@ class IsOwnerOrMemberElseForbidden (permissions.BasePermission):
             return False
         
         user = request.user
-        
-        return user == space.owner or space.spacemember_set.filter(user = user).exists()
+        if request.method in permissions.SAFE_METHODS:
+            return user == space.owner or space.spacemember_set.filter(user = user).exists()
+        else:
+            return user == space.owner
