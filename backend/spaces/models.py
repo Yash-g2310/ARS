@@ -6,7 +6,7 @@ from django.utils import timezone
 
 class Space(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    space_name = models.CharField(max_length=100)
+    space_name = models.CharField(max_length=100,blank=False,null=False)
     space_bio = models.TextField(blank=True,null=True)
     create_date = models.DateTimeField(auto_now_add=True)
     space_profile = models.ImageField(upload_to='space_profile/',null=True, blank=True)
@@ -23,6 +23,14 @@ class Space(models.Model):
     def sub_space_count(self):
         return self.subspace_set.count()
     
+class SpaceMember(models.Model):
+    space = models.ForeignKey(Space, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    join_date = models.DateField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = [('space','user')]
+        
 class SubSpace(models.Model):
     space = models.ForeignKey(Space, on_delete=models.CASCADE)
     sub_space_name = models.CharField(max_length=100)
@@ -43,15 +51,6 @@ class SubSpace(models.Model):
     @property
     def group_count(self):
         return self.group_set.filter(sub_space=self).count()
-
-
-class SpaceMember(models.Model):
-    space = models.ForeignKey(Space, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    join_date = models.DateField(auto_now_add=True)
-    
-    class Meta:
-        unique_together = [('space','user')]
 
 class SubSpaceMember(models.Model):
     REVIEWEE = 'reviewee'
