@@ -18,11 +18,13 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf.urls.static import static
 from django.conf import settings
+from spaces.views import AcceptInvite
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('',include('users.urls')),
     path('<str:username>/', include(('spaces.urls', 'spaces'), namespace='spaces')),
+    path('accept-invite/<uuid:invite_token>/',AcceptInvite.as_view(),name='accept_invite'),
 ]
 
 urlpatterns+= static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

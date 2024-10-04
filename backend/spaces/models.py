@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+import uuid
 # Create your models here.
 
 
@@ -11,6 +12,7 @@ class Space(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
     space_profile = models.ImageField(upload_to='space_profile/',null=True, blank=True)
     space_background = models.ImageField(upload_to='space_background/',null=True, blank=True)
+    space_token = models.UUIDField(default=uuid.uuid4,editable=False)
     
     def __str__(self) :
         return self.space_name
@@ -23,6 +25,18 @@ class Space(models.Model):
     def sub_space_count(self):
         return self.subspace_set.count()
     
+class SpaceInvitation(models.Model):
+    space = models.ForeignKey(Space,on_delete=models.CASCADE)
+    email = models.EmailField()
+    invite_token = models.UUIDField(default=uuid.uuid4,unique=True,editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True,blank=True)
+    message_by_owner = models.TextField(blank=True,null=True)
+    
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+    
+
 class SpaceMember(models.Model):
     space = models.ForeignKey(Space, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

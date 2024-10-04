@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Space, SpaceMember, SubSpace, SubSpaceMember
+from .models import Space, SpaceMember, SubSpace, SubSpaceMember, SpaceInvitation
 
 class SpaceListSerializer(serializers.ModelSerializer):
     is_owner = serializers.SerializerMethodField()
@@ -61,6 +61,36 @@ class SpaceCreateDetailSerializer(serializers.ModelSerializer):
     #     return representation
             
 
+class SendSpaceInvitationSerializer(serializers.ModelSerializer):
+    invited_by = serializers.CharField(source='space.owner', read_only = True)
+    class Meta:
+        model = SpaceInvitation
+        fields  =[
+            'email',
+            'invite_token',
+            'invited_by',
+            'created_at',
+            'message_by_owner'
+        ]
+        read_only = ['invite_token','invited_by','created_at']
+        
+    def validate(self,data):
+        
+        space_id = self.context.get('view').kwargs.get('pk')
+        # try:
+        #     space = Space.objects.get(id=space_id)
+        # except Space.DoesNotExist:
+        #     raise serializers.ValidationError("The space does not exist.")
+        
+        email = data.get('email')
+        if not email :
+            raise serializers.ValidationError("email not found")
+        
+        print(space_id,email)
+        if SpaceMember.objects.filter(space = space_id,user__email = email).exists():
+            raise serializers.ValidationError(f'user with email {email} is already a part of the space')
+        
+        return data
 
 # class SubSpaceSerializer(serializers.ModelSerializer):
 #     class Meta:

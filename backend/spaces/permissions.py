@@ -16,3 +16,7 @@ class IsOwnerOrMemberElseForbidden (permissions.BasePermission):
             return user == space.owner or space.spacemember_set.filter(user = user).exists()
         else:
             return user == space.owner
+        
+class IsSpaceOwnerOrForbidden(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.space.owner == request.user
