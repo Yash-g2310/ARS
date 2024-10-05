@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.conf import settings
+from urllib.parse import urljoin
+from django.urls import reverse
 import uuid
 # Create your models here.
 
@@ -16,6 +19,11 @@ class Space(models.Model):
     
     def __str__(self) :
         return self.space_name
+    
+    @property
+    def get_join_url(self):
+        join_url = reverse('join_space',kwargs={'space_token':self.space_token})
+        return urljoin(settings.FRONTEND_BASE_URL + '/',join_url)
     
     @property
     def member_count(self):
@@ -44,7 +52,31 @@ class SpaceMember(models.Model):
     
     class Meta:
         unique_together = [('space','user')]
+    
+    def __str__(self) -> str:
+        return f"{self.user.username} -> {self.space.space_name}"
         
+class SpaceJoinRequest(models.Model):
+    ACCEPTED = 'accepted'
+    PENDING = 'pending'
+    REJECTED = 'rejected'
+    REQUEST_STATUS = [
+        (ACCEPTED,'Accepted'),
+        (REJECTED,'Rejected'),
+        (PENDING,'Pending'),
+    ]
+    
+    space = models.ForeignKey(Space,on_delete=models.CASCADE)
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=50,choices=REQUEST_STATUS,default=PENDING)
+    
+    class Meta:
+        unique_together = [('space','user')]
+
+    def __str__(self) -> str:
+        return f'{self.user.username} -> {self.space.space_name}'
+
 class SubSpace(models.Model):
     space = models.ForeignKey(Space, on_delete=models.CASCADE)
     sub_space_name = models.CharField(max_length=100)
@@ -70,8 +102,8 @@ class SubSpaceMember(models.Model):
     REVIEWEE = 'reviewee'
     REVIEWER = 'reviewer'
     ROLE_CHOICES = [
-        ('reviewer','Reviewer'),
-        ('reviewee','Reviewee'),
+        (REVIEWER,'Reviewer'),
+        (REVIEWEE,'Reviewee'),
     ]
     space_member = models.ForeignKey(SpaceMember,on_delete=models.CASCADE)
     sub_space = models.ForeignKey(SubSpace,on_delete=models.CASCADE)

@@ -8,4 +8,7 @@ urlpatterns = [
     path('create-space/',views.SpaceCreateView.as_view(), name= 'space_creation'),
     path('<int:pk>/details/',views.SpaceDetailView.as_view(), name= 'space_details'),
     path('<int:pk>/invite-others/',views.SendSpaceInvitationView.as_view(),name='invite_others'),
+    path('<int:pk>/requests/',views.AcceptRequestListView.as_view(),name='request_list'),
+    path('<int:pk>/requests/<int:req_id>/accept/',views.AcceptRequestView.as_view(),name='accept_request'),
+    path('<int:pk>/requests/<int:req_id>/reject/',views.RejectRequestView.as_view(),name='reject_request'),
 ]

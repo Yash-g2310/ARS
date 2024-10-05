@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Space, SpaceMember, SubSpace, SubSpaceMember, SpaceInvitation
+from .models import Space, SpaceMember, SubSpace, SubSpaceMember, SpaceInvitation, SpaceJoinRequest
+from django.urls import reverse
+from urllib.parse import urljoin
+from django.conf import settings
 
 class SpaceListSerializer(serializers.ModelSerializer):
     is_owner = serializers.SerializerMethodField()
@@ -20,11 +23,13 @@ class SpaceCreateDetailSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(default = serializers.CurrentUserDefault())
     space_members = serializers.SerializerMethodField()
     sub_spaces = serializers.SerializerMethodField()
+    owner_username = serializers.SerializerMethodField()
     class Meta:
         model = Space
         fields = [
             'id',
             'owner',
+            'owner_username',
             'space_name',
             'space_bio',
             'create_date',
@@ -33,14 +38,18 @@ class SpaceCreateDetailSerializer(serializers.ModelSerializer):
             'member_count',
             'sub_space_count',
             'space_members',
-            'sub_spaces'
+            'sub_spaces',
+            'get_join_url',
         ]
 
+    def get_owner_username(self,obj):
+        return obj.owner.username
+    
     def create(self, validated_data):
         space = super().create(validated_data)
         SpaceMember.objects.create(space = space,  user = validated_data['owner'])
         return space
-        
+
     def get_space_members(self,obj):
         if self.context['request'].method == 'GET':
             return [{'space_member_id':member.id, 'space_member_username':member.user.username} for member in obj.spacemember_set.all()]
@@ -61,6 +70,40 @@ class SpaceCreateDetailSerializer(serializers.ModelSerializer):
     #     return representation
             
 
+class SpaceJoinRequestSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    accept_url = serializers.SerializerMethodField()
+    reject_url = serializers.SerializerMethodField()
+    class Meta:
+        model = SpaceJoinRequest
+        fields = ['space','user','username','created_at','status','accept_url','reject_url']
+        read_only_fields =  ['space','user','created_at','status',]
+        
+    def get_dict(self,obj):
+        username = self.context.get('username')
+        if not username:
+            raise serializers.ValidationError("username not found")
+        space_id = self.context.get('space_id')
+        if not space_id:
+            raise serializers.ValidationError('space id not found')
+        return {'req_id':obj.id,'pk':space_id,'username':username}
+    
+    def get_username(self,obj):
+        return obj.user.username
+    
+    def get_accept_url(self,obj):
+        accept_url = reverse('spaces:accept_request',kwargs=self.get_dict(obj))
+        return urljoin(settings.FRONTEND_BASE_URL +'/',accept_url)
+    
+    def get_reject_url(self,obj):
+        reject_url = reverse('spaces:reject_request',kwargs=self.get_dict(obj))
+        return urljoin(settings.FRONTEND_BASE_URL +'/',reject_url)
+    
+    def create(self, validated_data):
+        validated_data['space'] = self.context['space']
+        validated_data['user'] = self.context['user']
+        return SpaceJoinRequest.objects.create(**validated_data)
+
 class SendSpaceInvitationSerializer(serializers.ModelSerializer):
     invited_by = serializers.CharField(source='space.owner', read_only = True)
     class Meta:
@@ -77,10 +120,8 @@ class SendSpaceInvitationSerializer(serializers.ModelSerializer):
     def validate(self,data):
         
         space_id = self.context.get('view').kwargs.get('pk')
-        # try:
-        #     space = Space.objects.get(id=space_id)
-        # except Space.DoesNotExist:
-        #     raise serializers.ValidationError("The space does not exist.")
+        if not space_id:
+            raise serializers.ValidationError("space id is not present")
         
         email = data.get('email')
         if not email :

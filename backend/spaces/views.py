@@ -3,13 +3,14 @@ from django.shortcuts import render
 from rest_framework import generics,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Space,SpaceMember
-from .serializers import SpaceListSerializer,SpaceCreateDetailSerializer,SpaceInvitation,SendSpaceInvitationSerializer
+from .models import Space,SpaceMember,SpaceJoinRequest
+from .serializers import SpaceListSerializer,SpaceCreateDetailSerializer,SpaceInvitation,SendSpaceInvitationSerializer,SpaceJoinRequestSerializer
 from .permissions import IsSpaceOwnerOrForbidden
 from .utility import send_invite_email
 from django.utils import timezone
-from django.shortcuts import redirect
+from django.shortcuts import redirect,get_object_or_404
 from django.conf import settings
+from django.db import transaction
 # Create your views here.
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,95 @@ class SpaceDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = SpaceCreateDetailSerializer
     lookup_field = 'pk'
     
+class JoinSpaceRequestView(generics.CreateAPIView):
+    serializer_class = SpaceJoinRequestSerializer
+    
+    def get(self,request,*args, **kwargs):
+        user = request.user
+        space_token = self.kwargs.get('space_token')
+        space = get_object_or_404(Space, space_token=space_token)
+        if SpaceMember.objects.filter(space = space, user = user).exists():
+            return Response({"detail":"you are already a member of this space"},status=status.HTTP_200_OK)
+        if SpaceJoinRequest.objects.filter(space = space, user = user, status = 'pending').exists():
+            return Response({"detail":"You have already requested to join this space"},status=status.HTTP_200_OK)
+        return Response({"detail":"you can request to join this space"})
+    
+    def post(self, request, *args, **kwargs):
+        space_token = self.kwargs.get('space_token')
+        try:
+            space = Space.objects.get(space_token = space_token)
+        except Space.DoesNotExist:
+            return Response({'error':'space not found'},status=status.HTTP_404_NOT_FOUND)
+        context = {
+            'space':space,
+            'user':request.user
+        }
+        serializer = self.get_serializer(data={},context=context)
+        serializer.is_valid(raise_exception = True)
+        serializer.save()
+        
+        return Response({'message':'Your request to join the space has been submitted'},status=status.HTTP_201_CREATED)
+    
+class AcceptRequestListView(generics.ListAPIView):
+    serializer_class = SpaceJoinRequestSerializer
+    
+    def get_queryset(self):
+        space_id = self.kwargs.get('pk')
+        queryset = SpaceJoinRequest.objects.filter(space = space_id,status = 'pending')
+        return queryset
+        
+    def get(self,request,*args, **kwargs):
+        space_id = self.kwargs.get('pk')
+        space = get_object_or_404(Space, id = space_id)
+        if space.owner !=request.user:
+            return Response({"error":"You do not have permission to access this resource"},status=status.HTTP_403_FORBIDDEN)
+        queryset = self.get_queryset()
+        
+        serializer = self.get_serializer(queryset,many= True, context = {
+            'username':request.user.username,
+            'space_id':space.id,
+        })
+        return Response(serializer.data)
+    
+class BaseRequestView(APIView):
+    def get_join_request(self,req_id):
+        return get_object_or_404(SpaceJoinRequest, id=req_id)
+    
+    def check_owner(self, join_request,user):
+        if join_request.space.owner != user:
+            return Response({'error':"you don't have permission to do this action"},status=status.HTTP_403_FORBIDDEN)
+        return None
+    
+class AcceptRequestView(BaseRequestView):
+    def post(self,request,req_id,*args, **kwargs):
+        join_request = self.get_join_request(req_id)
+        permission_response = self.check_owner(join_request,request.user)
+        if permission_response:
+            return permission_response
+        
+        with transaction.atomic():
+            join_request.status = SpaceJoinRequest.ACCEPTED
+            join_request.save()
+            SpaceMember.objects.create(space = join_request.space,user = join_request.user)
+            join_request.delete()
+            
+        return Response({"success":"join request accepted"},status=status.HTTP_200_OK)
+    
+class RejectRequestView(BaseRequestView):
+    
+    def post(self,request,req_id,*args, **kwargs):
+        join_request = self.get_join_request(req_id)
+        permission_response = self.check_owner(join_request,request.user)
+        if permission_response:
+            return permission_response
+
+        with transaction.atomic():
+            join_request.status = SpaceJoinRequest.REJECTED
+            join_request.save()
+            join_request.delete()
+
+        return Response({"success": "Join request rejected"}, status=status.HTTP_200_OK)
+
 class SendSpaceInvitationView(generics.CreateAPIView):
     queryset = SpaceInvitation.objects.all()
     serializer_class = SendSpaceInvitationSerializer
