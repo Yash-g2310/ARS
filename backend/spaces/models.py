@@ -54,7 +54,7 @@ class SpaceMember(models.Model):
         unique_together = [('space','user')]
     
     def __str__(self) -> str:
-        return f"{self.user.username} -> {self.space.space_name}"
+        return f"{self.user.username} -> {self.space.space_name} {self.id}"
         
 class SpaceJoinRequest(models.Model):
     ACCEPTED = 'accepted'

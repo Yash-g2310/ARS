@@ -61,13 +61,6 @@ class SpaceCreateDetailSerializer(serializers.ModelSerializer):
             return [{'subspace_id':subspace.id,'subspace_name':subspace.sub_space_name,} for subspace in obj.subspace_set.all()]
         else:
             return []
-    
-    # def to_representation(self, instance):
-    #     representation = super().to_representation(instance)
-        
-    #     if self.context['view'].action == 'retrieve':
-    #         pass
-    #     return representation
             
 
 class SpaceJoinRequestSerializer(serializers.ModelSerializer):
@@ -132,28 +125,39 @@ class SendSpaceInvitationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f'user with email {email} is already a part of the space')
         
         return data
+    
+class SubSpaceMemberSerializer(serializers.ModelSerializer):
+    space_member_id = serializers.PrimaryKeyRelatedField(queryset = SpaceMember.objects.all())
+    username = serializers.CharField(source='space_member.user.username', read_only=True)
+    class Meta:
+        model = SubSpaceMember
+        fields = ['space_member_id','username','join_date','role',]
+    
 
-# class SubSpaceSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = SubSpace
-#         fields = ['id', 'sub_space_name', 'sub_space_bio', 'create_date']
+class SubSpaceCreationSerializer(serializers.ModelSerializer):
+    reviewers = serializers.PrimaryKeyRelatedField(many = True,queryset = SpaceMember.objects.none())
+    reviewees = serializers.PrimaryKeyRelatedField(many = True,queryset = SpaceMember.objects.none())
+    class Meta:
+        model = SubSpace
+        fields = [
+                'sub_space_name',
+                'sub_space_bio',
+                'reviewers',
+                'reviewees',
+            ]
+    def __init__(self,*args, **kwargs):
+        self.space_id = kwargs.pop('space_id')
+        super().__init__(*args, **kwargs)
+        if self.space_id:
+            self.fields['reviewers'].queryset = SpaceMember.objects.filter(space = self.space_id)
+            self.fields['reviewees'].queryset = SpaceMember.objects.filter(space = self.space_id)
+        else:
+            raise serializers.ValidationError("space id not found")
+        print("Reviewers queryset:", self.fields['reviewers'].queryset)
+        print("Reviewees queryset:", self.fields['reviewees'].queryset)
+        
+    def get_reviewers_queryset(self):
+        return SpaceMember.objects.filter(space=self.space_id)
 
-
-#     class Meta:
-#         model = Space
-#         fields = ['id', 'space_name', 'space_bio', 'create_date', 'space_profile', 'space_background', 'members', 'sub_space_count']
-
-#     def get_members(self, obj):
-#         members = SpaceMember.objects.filter(space=obj)
-#         return SpaceMemberSerializer(members, many=True).data
-
-# class UserSubSpaceSerializer(serializers.ModelSerializer):
-#     sub_spaces = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = SubSpaceMember
-#         fields = ['sub_space', 'sub_spaces']
-
-#     def get_sub_spaces(self, obj):
-#         sub_spaces = SubSpace.objects.filter(subspacemember__space_member__user=obj.space_member.user)
-#         return SubSpaceSerializer(sub_spaces, many=True).data
+    def get_reviewees_queryset(self):
+        return SpaceMember.objects.filter(space=self.space_id)

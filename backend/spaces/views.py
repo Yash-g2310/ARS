@@ -4,7 +4,7 @@ from rest_framework import generics,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Space,SpaceMember,SpaceJoinRequest
-from .serializers import SpaceListSerializer,SpaceCreateDetailSerializer,SpaceInvitation,SendSpaceInvitationSerializer,SpaceJoinRequestSerializer
+from .serializers import SpaceListSerializer,SpaceCreateDetailSerializer,SpaceInvitation,SendSpaceInvitationSerializer,SpaceJoinRequestSerializer,SubSpaceCreationSerializer
 from .permissions import IsSpaceOwnerOrForbidden
 from .utility import send_invite_email
 from django.utils import timezone
@@ -178,3 +178,20 @@ class AcceptInvite(APIView):
             return Response({"message": "Invite accepted!"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error":f"problem in creating user {str(e)}"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class SubSpaceCreateView(generics.CreateAPIView):
+    serializer_class = SubSpaceCreationSerializer
+    permission_classes = [IsSpaceOwnerOrForbidden]
+    def get_serializer(self, *args, **kwargs):
+        space_id = self.kwargs.get('pk')
+        kwargs['space_id'] = space_id
+        
+        return super().get_serializer(*args, **kwargs)
+    
+    def get(self, request, *args, **kwargs):
+        space_id = self.kwargs.get('pk')
+        serializer = self.get_serializer(space_id=space_id)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)

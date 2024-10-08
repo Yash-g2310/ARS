@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from .models import Space
+from django.shortcuts import get_object_or_404
 
 class IsOwnerOrMemberElseForbidden (permissions.BasePermission):
     def has_permission(self, request, view):
@@ -18,5 +19,6 @@ class IsOwnerOrMemberElseForbidden (permissions.BasePermission):
             return user == space.owner
         
 class IsSpaceOwnerOrForbidden(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return obj.space.owner == request.user
+    def has_permission(self, request, view):
+        space = get_object_or_404(Space,id= view.kwargs.get('pk'))
+        return space.owner == request.user
