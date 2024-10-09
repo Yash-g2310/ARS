@@ -215,23 +215,54 @@ class SubSpaceListSerializer(serializers.ModelSerializer):
         return SubSpaceMember.objects.filter(sub_space= obj, space_member = space_member).exists()
 
 
-class SubSpaceDetailUpdateSerializer(serializers.ModelSerializer):
-    reviewers = serializers.SerializerMethodField()
-    reviewees = serializers.SerializerMethodField()
+class SubSpaceDetailUpdateSerializer(SubSpaceCreateSerializer):
+    reviewers_list = serializers.SerializerMethodField()
+    reviewees_list = serializers.SerializerMethodField()
     sub_space_id = serializers.SerializerMethodField()
     space = serializers.PrimaryKeyRelatedField(read_only = True)
     space_name = serializers.CharField(source='space.space_name', read_only = True)
-    class Meta:
-        model = SubSpace
-        fields = ['sub_space_id','space','space_name','sub_space_name','sub_space_bio','create_date','reviewer_count','reviewee_count','group_count','reviewers','reviewees']
+    class Meta(SubSpaceCreateSerializer.Meta):
+        fields = SubSpaceCreateSerializer.Meta.fields + ['sub_space_id','space','space_name','sub_space_name','sub_space_bio','create_date','reviewer_count','reviewee_count','group_count','reviewers_list','reviewees_list','reviewers','reviewees']
         
     def get_sub_space_id(self,obj):
         return obj.id
     
-    def get_reviewers(self,obj):
+    def get_reviewers_list(self,obj):
         reviewers = SubSpaceMember.objects.filter(sub_space = obj,role = SubSpaceMember.REVIEWER)
         return SubSpaceMemberSerializer(reviewers,many = True).data
     
-    def get_reviewees(self,obj):
+    def get_reviewees_list(self,obj):
         reviewees = SubSpaceMember.objects.filter(sub_space = obj,role = SubSpaceMember.REVIEWEE)
         return SubSpaceMemberSerializer(reviewees,many = True).data
+    
+    def update(self, instance, validated_data):
+        reviewers = validated_data.pop('reviewers',[])
+        reviewees = validated_data.pop('reviewees',[])
+        
+        current_reviewers = SubSpaceMember.objects.filter(sub_space = instance,role =SubSpaceMember.REVIEWER)
+        current_reviewers_ids = set(current_reviewers.values_list('space_member_id',flat=True))
+        new_reviewers_ids = set(member.id for member in reviewers)
+        
+        reviewers_to_delete = current_reviewers.exclude(space_member_id__in = new_reviewers_ids)
+        reviewers_to_delete.delete()
+        
+        for reviewer in reviewers:
+            if reviewer.id not in current_reviewers_ids:
+                SubSpaceMember.objects.create(sub_space = instance, space_member = reviewer,role = SubSpaceMember.REVIEWER)
+        
+        current_reviewees = SubSpaceMember.objects.filter(sub_space = instance,role =SubSpaceMember.REVIEWEE)
+        current_reviewees_ids = set(current_reviewees.values_list('space_member_id',flat=True))
+        new_reviewees_ids = set(member.id for member in reviewees)
+        
+        reviewees_to_delete = current_reviewees.exclude(space_member_id__in = new_reviewees_ids)
+        reviewees_to_delete.delete()
+        
+        for reviewee in reviewees:
+            if reviewee.id not in current_reviewees_ids:
+                SubSpaceMember.objects.create(sub_space = instance, space_member = reviewee,role = SubSpaceMember.REVIEWEE)
+        
+        instance.sub_space_name = validated_data.get('sub_space_name', instance.sub_space_name)
+        instance.sub_space_bio = validated_data.get('sub_space_bio', instance.sub_space_bio)
+        instance.save()
+        
+        return instance

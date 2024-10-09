@@ -232,5 +232,8 @@ class SubSpaceDetailView(generics.RetrieveUpdateAPIView):
     def get_serializer_context(self):
         context =  super().get_serializer_context()
         context['sub_space_id']  = self.kwargs.get('id')
+        space_id = self.kwargs.get('pk')
+        space = get_object_or_404(Space, id=space_id)
+        context['space'] = space
         return context
     
