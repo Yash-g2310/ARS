@@ -113,6 +113,9 @@ class SubSpaceMember(models.Model):
     class Meta:
         unique_together = [('space_member','sub_space')]
         
+    def __str__(self) -> str:
+        return f"{self.space_member.user.username} -> {self.sub_space.sub_space_name} {self.id}"
+        
 class Group(models.Model):
     space = models.ForeignKey(Space,on_delete=models.CASCADE,null=True)
     sub_space = models.ForeignKey(SubSpace,on_delete=models.CASCADE,null=True)

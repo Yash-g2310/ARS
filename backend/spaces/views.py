@@ -3,8 +3,8 @@ from django.shortcuts import render
 from rest_framework import generics,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Space,SpaceMember,SpaceJoinRequest
-from .serializers import SpaceListSerializer,SpaceCreateDetailSerializer,SpaceInvitation,SendSpaceInvitationSerializer,SpaceJoinRequestSerializer,SubSpaceCreationSerializer
+from .models import Space,SpaceMember,SpaceJoinRequest,SubSpaceMember,SubSpace
+from .serializers import SpaceListSerializer,SpaceCreateDetailSerializer,SpaceInvitation,SendSpaceInvitationSerializer,SpaceJoinRequestSerializer,SubSpaceCreateSerializer,SpaceMemberSerializer,SubSpaceListSerializer,SubSpaceDetailUpdateSerializer
 from .permissions import IsSpaceOwnerOrForbidden
 from .utility import send_invite_email
 from django.utils import timezone
@@ -179,19 +179,58 @@ class AcceptInvite(APIView):
         except Exception as e:
             return Response({"error":f"problem in creating user {str(e)}"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-class SubSpaceCreateView(generics.CreateAPIView):
-    serializer_class = SubSpaceCreationSerializer
+class SpaceMembersListView(generics.ListAPIView):
+    serializer_class = SpaceMemberSerializer
+    def get_queryset(self):
+        space_id = self.kwargs.get('pk') 
+        return SpaceMember.objects.filter(space=space_id)
+
+class SubSpaceCreateView(generics.ListCreateAPIView):
+    serializer_class = SubSpaceCreateSerializer
     permission_classes = [IsSpaceOwnerOrForbidden]
-    def get_serializer(self, *args, **kwargs):
-        space_id = self.kwargs.get('pk')
-        kwargs['space_id'] = space_id
-        
-        return super().get_serializer(*args, **kwargs)
     
-    def get(self, request, *args, **kwargs):
+    def get_queryset(self):
+        space_id = self.kwargs.get('pk') 
+        return SpaceMember.objects.filter(space=space_id)
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
         space_id = self.kwargs.get('pk')
-        serializer = self.get_serializer(space_id=space_id)
-        return Response(serializer.data)
+        space = get_object_or_404(Space, id=space_id)
+        context['space'] = space
+        return context
+        
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = SpaceMemberSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+        serializer = self.serializer_class(data=request.data, context=self.get_serializer_context())
+        if serializer.is_valid():
+            sub_space = serializer.save()  
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class SubSpaceListView(generics.ListAPIView):
+    serializer_class = SubSpaceListSerializer
+    def get_queryset(self):
+        space_id = self.kwargs.get('pk')
+        queryset =SubSpace.objects.filter(space = space_id)
+        return queryset.distinct()
+    def get_serializer_context(self):
+        context =  super().get_serializer_context()
+        context['space_id']  = self.kwargs.get('pk')
+        return context
+    
+class SubSpaceDetailView(generics.RetrieveUpdateAPIView):
+    serializer_class = SubSpaceDetailUpdateSerializer
+    lookup_field = 'id'
+    queryset = SubSpace.objects.all()
+    
+    def get_serializer_context(self):
+        context =  super().get_serializer_context()
+        context['sub_space_id']  = self.kwargs.get('id')
+        return context
+    
