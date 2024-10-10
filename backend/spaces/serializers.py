@@ -175,6 +175,7 @@ class SubSpaceCreateSerializer(serializers.ModelSerializer):
         reviewers = validated_data.pop('reviewers')
         reviewees = validated_data.pop('reviewees')
         space = self.context['space']  
+        request = self.context['request']
 
         sub_space = SubSpace.objects.create(
             space=space,
@@ -183,6 +184,8 @@ class SubSpaceCreateSerializer(serializers.ModelSerializer):
         )
 
         for reviewer in reviewers:
+            if reviewer.user == request.user:
+                continue
             SubSpaceMember.objects.create(
                 space_member=reviewer,
                 sub_space=sub_space,
@@ -190,11 +193,15 @@ class SubSpaceCreateSerializer(serializers.ModelSerializer):
             )
         
         for reviewee in reviewees:
+            if reviewee.user == request.user:
+                continue
             SubSpaceMember.objects.create(
                 space_member=reviewee,
                 sub_space=sub_space,
                 role=SubSpaceMember.REVIEWEE
             )
+        owner = SpaceMember.objects.get(space = space,user = space.owner)
+        SubSpaceMember.objects.create(space_member = owner,sub_space=sub_space,role = SubSpaceMember.OWNER)
 
         return sub_space
     

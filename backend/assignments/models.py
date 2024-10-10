@@ -19,6 +19,17 @@ class Assignment(models.Model):
     def subtask_count(self):
         return self.assignmentsubtask_set.count()
     
+    @property
+    def reviewer_count(self):
+        return self.assignmentreviewer_set.count()
+    @property
+
+    def reviewee_count(self):
+        return self.assignmentreviewer_set.count()
+
+    def team_count(self):
+        return self.assignmentteam_set.count()
+    
     def __str__(self) -> str:
         return f"{self.title}"
     

@@ -101,9 +101,11 @@ class SubSpace(models.Model):
 class SubSpaceMember(models.Model):
     REVIEWEE = 'reviewee'
     REVIEWER = 'reviewer'
+    OWNER = 'owner'
     ROLE_CHOICES = [
         (REVIEWER,'Reviewer'),
         (REVIEWEE,'Reviewee'),
+        (OWNER,'Owner'),
     ]
     space_member = models.ForeignKey(SpaceMember,on_delete=models.CASCADE)
     sub_space = models.ForeignKey(SubSpace,on_delete=models.CASCADE)

@@ -169,16 +169,20 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         sub_space_id = self.context.get('sub_space_id')
         if (not request) or (not sub_space_id) :
             raise serializers.ValidationError("problem in getting context parameters while creating assignment")
-
+        sub_space =SubSpace.objects.get(id = sub_space_id) 
         user = request.user
-        try:
-            sub_space_member = SubSpaceMember.objects.get(sub_space = sub_space_id, space_member__user = user,role = SubSpaceMember.REVIEWER)
-        except SubSpaceMember.DoesNotExist:
-            raise serializers.ValidationError("user is not a reviewer in this subspace")
+        if not user ==sub_space.space.owner:
+            try:
+                sub_space_member = SubSpaceMember.objects.get(sub_space = sub_space_id, space_member__user = user,role = SubSpaceMember.REVIEWER)
+            except SubSpaceMember.DoesNotExist:
+                raise serializers.ValidationError("user is not a reviewer in this subspace")
+            validated_data['uploader'] = sub_space_member
+        else:
+            owner = SubSpaceMember.objects.filter(role = SubSpaceMember.OWNER).first()
+            validated_data['uploader'] = owner
+            
         
-        validated_data['uploader'] = sub_space_member
-        validated_data['sub_space'] = SubSpace.objects.get(id = sub_space_id)
-        
+        validated_data['sub_space'] = sub_space
         assignment_details_data = validated_data.pop('assignment_details',[])
         subtasks_data = validated_data.pop('subtasks',[])
         reviewers_data = validated_data.pop('reviewers',[])
@@ -216,3 +220,52 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
                     TeamMember.objects.create(team = team, **member_data)
 
         return assignment
+
+class AssignmentListSerializer(serializers.ModelSerializer):
+    assignment_id = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
+    class Meta:
+        model = Assignment
+        fields = [
+            'assignment_id',
+            'title',
+            'upload_date',
+            'subtask_count',
+            'reviewer_count',
+            'reviewee_count',
+            'team_count',
+            'role',
+        ]
+    def get_assignment_id(self,obj):
+        return obj.id
+    def get_role(self,obj):
+        sub_space_member = self.context.get('sub_space_member')
+        if not sub_space_member:
+            raise serializers.ValidationError("subspace member is not passed in context")
+        if AssignmentReviewee.objects.filter(assignment =obj,reviewee=sub_space_member).exists():
+            return SubSpaceMember.REVIEWEE
+        elif AssignmentReviewer.objects.filter(assignment =obj,reviewer=sub_space_member).exists():
+            return SubSpaceMember.REVIEWER
+        elif TeamMember.objects.filter(team__assignment= obj,member = sub_space_member).exists():
+            return 'team'
+        return "not part of this assignment"
+    
+class AssignmentDetailUpdateSerializer(AssignmentCreateSerializer):
+    subtask_list = AssignmentSubtaskSerializer(many = True,read_only = True)
+    assignment_detail_list = AssignmentDetailsSerializer(many = True,read_only = True)
+    reviewers_list = AssignmentReviewerSerializer(many = True,read_only = True)
+    reviewees_list = AssignmentRevieweeSerializer(many = True,read_only = True)
+    teams_list = AssignmentTeamSerializer(many = True,read_only = True)
+    
+    class Meta(AssignmentCreateSerializer.Meta):
+        model = Assignment
+        fields = AssignmentCreateSerializer.Meta.fields + [
+            'subtask_count',
+            'reviewer_count',
+            'reviewee_count',
+            'assignment_detail_list',
+            'subtask_list',
+            'reviewers_list',
+            'reviewees_list',
+            'teams_list',
+        ]
