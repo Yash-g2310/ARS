@@ -1,3 +1,4 @@
+from typing import Iterable
 from django.db import models
 from spaces.models import SubSpaceMember,SubSpace
 from django.utils import timezone
@@ -9,10 +10,10 @@ class Assignment(models.Model):
     sub_space =  models.ForeignKey(SubSpace, on_delete=models.CASCADE)
     title = models.CharField(max_length=150)
     description = models.TextField(null=False)
-    upload_date = models.DateTimeField(default=timezone.now)
+    upload_date = models.DateTimeField(auto_now_add=True)
     iteration_date = models.DateTimeField(null=True,blank=True)
     due_date = models.DateTimeField(null=True,blank=True)
-    updated_at = models.DateTimeField(null=True,blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     @property
     def subtask_count(self):
@@ -26,7 +27,7 @@ class AssignmentDetails(models.Model):
 
 class AssignmentSubtask(models.Model):
     COMPULSORY = 'compulsory'
-    OPTIONAL = 'OPTIONAL'
+    OPTIONAL = 'optional'
     BROWNIE = 'brownie_point'
     SUBTASK_TAGS = [
         (COMPULSORY,'Compulsory'),
@@ -66,8 +67,17 @@ class AssignmentReviewee(models.Model):
         unique_together = [('assignment','reviewee')]
         
 class AssignmentTeam(models.Model):
+    SUBMITTED = 'submitted'
+    NOT_SUBMITTED = 'not_submitted'
+    COMPLETED = 'completed'
+    TEAM_STATUS_LIST = [
+        (SUBMITTED,'Submitted'),
+        (NOT_SUBMITTED,'Not_Submitted'),
+        (COMPLETED,'Completed'),
+    ]
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
     team_name = models.CharField(max_length=150)
+    team_status = models.CharField(max_length=40, choices=TEAM_STATUS_LIST,default=NOT_SUBMITTED)
     
     @property
     def member_count(self):
@@ -84,6 +94,9 @@ class TeamMember(models.Model):
     def save(self, *args, **kwargs):
         if self.member.role != 'reviewee':
             raise ValidationError(f"{self.member} is not a reviewee!")
+        if TeamMember.objects.filter(team__assignment =self.team.assignment, memeber = self.member).exists():
+            raise ValidationError(f"{self.member} is already part of another team")
+        
         return super().save(*args, **kwargs)
     
     class Meta:

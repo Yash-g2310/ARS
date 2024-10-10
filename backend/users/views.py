@@ -114,6 +114,7 @@ class ChanneliTokenRecall(APIView):
         try:
             login(request,user)
             # return Response({"detail":"logged in successfully"},status=status.HTTP_200_OK)
+            
             return redirect(f"http://localhost:8000/{user.username}/profile/")
         except:
             return Response({'error':'unable to log you in'},status=status.HTTP_400_BAD_REQUEST)

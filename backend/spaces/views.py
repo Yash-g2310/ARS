@@ -4,7 +4,7 @@ from rest_framework import generics,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Space,SpaceMember,SpaceJoinRequest,SubSpaceMember,SubSpace
-from .serializers import SpaceListSerializer,SpaceCreateDetailSerializer,SpaceInvitation,SendSpaceInvitationSerializer,SpaceJoinRequestSerializer,SubSpaceCreateSerializer,SpaceMemberSerializer,SubSpaceListSerializer,SubSpaceDetailUpdateSerializer
+from .serializers import SpaceListSerializer,SpaceCreateDetailSerializer,SpaceInvitation,SendSpaceInvitationSerializer,SpaceJoinRequestSerializer,SubSpaceCreateSerializer,SpaceMemberSerializer,SubSpaceListSerializer,SubSpaceDetailUpdateSerializer,SubSpaceMemberSerializer
 from .permissions import IsSpaceOwnerOrForbidden
 from .utility import send_invite_email
 from django.utils import timezone
@@ -237,3 +237,10 @@ class SubSpaceDetailView(generics.RetrieveUpdateAPIView):
         context['space'] = space
         return context
     
+class SubSpaceMembersListView(generics.ListAPIView):
+    serializer_class = SubSpaceMemberSerializer
+    def get_queryset(self):
+        sub_space_id = self.kwargs.get('id')
+        queryset = SubSpaceMember.objects.filter(sub_space=sub_space_id)
+        return queryset
+

@@ -139,7 +139,7 @@ class SubSpaceMemberSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='space_member.user.username', read_only=True)
     class Meta:
         model = SubSpaceMember
-        fields = ['space_member_id','username','join_date','role',]
+        fields = ['id','space_member_id','username','join_date','role',]
     
 
 class SubSpaceCreateSerializer(serializers.ModelSerializer):
@@ -246,16 +246,16 @@ class SubSpaceDetailUpdateSerializer(SubSpaceCreateSerializer):
         reviewers_to_delete = current_reviewers.exclude(space_member_id__in = new_reviewers_ids)
         reviewers_to_delete.delete()
         
-        for reviewer in reviewers:
-            if reviewer.id not in current_reviewers_ids:
-                SubSpaceMember.objects.create(sub_space = instance, space_member = reviewer,role = SubSpaceMember.REVIEWER)
-        
         current_reviewees = SubSpaceMember.objects.filter(sub_space = instance,role =SubSpaceMember.REVIEWEE)
         current_reviewees_ids = set(current_reviewees.values_list('space_member_id',flat=True))
         new_reviewees_ids = set(member.id for member in reviewees)
         
         reviewees_to_delete = current_reviewees.exclude(space_member_id__in = new_reviewees_ids)
         reviewees_to_delete.delete()
+        
+        for reviewer in reviewers:
+            if reviewer.id not in current_reviewers_ids:
+                SubSpaceMember.objects.create(sub_space = instance, space_member = reviewer,role = SubSpaceMember.REVIEWER)
         
         for reviewee in reviewees:
             if reviewee.id not in current_reviewees_ids:
@@ -266,3 +266,4 @@ class SubSpaceDetailUpdateSerializer(SubSpaceCreateSerializer):
         instance.save()
         
         return instance
+    
