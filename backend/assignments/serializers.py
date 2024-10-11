@@ -3,12 +3,20 @@ from .models import Assignment,AssignmentDetails,AssignmentSubtask,AssignmentRev
 from spaces.models import SubSpaceMember,SubSpace
 from spaces.serializers import SubSpaceMemberSerializer
 from django.db import transaction
+from django.shortcuts import get_object_or_404
+
+# while updating assignment, we need to pass the id with the attributes which need to be updated.
+# since request will always be put so, the attributes which are not found will be deleted
+# the attributes without id will be newly created
+# need to handle all this in frontend
+
 
 class AssignmentDetailsSerializer(serializers.ModelSerializer):
     assignment_id = serializers.SerializerMethodField(read_only = True)
     class Meta:
         model = AssignmentDetails
         fields = [
+            'id',
             'assignment_id',
             'title',
             'description',
@@ -21,6 +29,7 @@ class AssignmentSubtaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssignmentSubtask
         fields = [
+            'id',
             'assignment_id',
             'title',
             'description',
@@ -36,10 +45,11 @@ class AssignmentSubtaskSerializer(serializers.ModelSerializer):
 class AssignmentReviewerSerializer(serializers.ModelSerializer):
     assignment_id = serializers.SerializerMethodField(read_only = True)
     reviewer_id = serializers.IntegerField(write_only = True)
-    reviewer = SubSpaceMemberSerializer()
+    reviewer = SubSpaceMemberSerializer(read_only = True)
     class Meta:
         model = AssignmentReviewer
         fields = [
+            'id',
             'assignment_id',
             'reviewer_id',
             "reviewer",
@@ -62,10 +72,11 @@ class AssignmentReviewerSerializer(serializers.ModelSerializer):
 class AssignmentRevieweeSerializer(serializers.ModelSerializer):
     assignment_id = serializers.SerializerMethodField(read_only = True)
     reviewee_id = serializers.IntegerField(write_only = True)
-    reviewee = SubSpaceMemberSerializer()
+    reviewee = SubSpaceMemberSerializer(read_only =True)
     class Meta:
         model = AssignmentReviewee
         fields = [
+            'id',
             'assignment_id',
             'reviewee_id',
             'reviewee_status',
@@ -75,7 +86,6 @@ class AssignmentRevieweeSerializer(serializers.ModelSerializer):
         ]
         
         extra_kwargs = {
-            'reviewee':{'read_only':True},
             'reviewee_status' : {'read_only':True},
         }
         
@@ -93,10 +103,11 @@ class AssignmentRevieweeSerializer(serializers.ModelSerializer):
 class TeamMemberSerializer(serializers.ModelSerializer):
     team = serializers.PrimaryKeyRelatedField(read_only = True)
     member_id = serializers.IntegerField(write_only = True)
-    member = SubSpaceMemberSerializer()
+    member = SubSpaceMemberSerializer(read_only=True)
     class Meta:
         model = TeamMember
         fields = [
+            'id',
             'team',
             'member_id',
             'member',
@@ -128,6 +139,7 @@ class AssignmentTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssignmentTeam
         fields = [
+            'id',
             'assignment_id',
             'team_name',
             'team_status',
@@ -162,16 +174,17 @@ class AssignmentTeamSerializer(serializers.ModelSerializer):
 
 class AssignmentCreateSerializer(serializers.ModelSerializer):
     uploader = serializers.PrimaryKeyRelatedField(read_only = True)
-    subtasks = AssignmentSubtaskSerializer(many = True,write_only = True,required = False)
-    assignment_details = AssignmentDetailsSerializer(many = True,write_only = True,required = False)
+    subtasks = AssignmentSubtaskSerializer(many = True,required = False)
+    assignment_details = AssignmentDetailsSerializer(many = True,required = False)
     reviewers = AssignmentReviewerSerializer(many = True,write_only = True)
     reviewees = AssignmentRevieweeSerializer(many = True,write_only = True)
-    teams = AssignmentTeamSerializer(many = True,write_only = True, required = False)
+    teams = AssignmentTeamSerializer(many = True, required = False)
     sub_space = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
         model = Assignment
         fields = [
+            'id',
             'uploader',
             'sub_space',
             'title',
@@ -180,7 +193,6 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
             'iteration_date',
             'due_date',
             'updated_at',
-            'subtask_count',
             'assignment_details',
             'subtasks',
             'reviewers',
@@ -208,7 +220,6 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         if reviewers & team_members:
             raise serializers.ValidationError("Team members and reviewers should not overlap")
         
-        # Ensure reviewers and reviewees do not overlap
         if reviewers & reviewees:
             raise serializers.ValidationError("Reviewers and reviewees cannot overlap.")
         
@@ -302,11 +313,11 @@ class AssignmentListSerializer(serializers.ModelSerializer):
         return "not part of this assignment"
     
 class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
-    subtask_list = serializers.SerializerMethodField()
-    assignment_detail_list = serializers.SerializerMethodField()
-    reviewers_list = serializers.SerializerMethodField()
-    reviewees_list = serializers.SerializerMethodField()
-    teams_list = serializers.SerializerMethodField()
+    subtask_list = serializers.SerializerMethodField(read_only = True)
+    assignment_detail_list = serializers.SerializerMethodField(read_only = True)
+    reviewers_list = serializers.SerializerMethodField(read_only = True)
+    reviewees_list = serializers.SerializerMethodField(read_only = True)
+    teams_list = serializers.SerializerMethodField(read_only = True)
     
     class Meta(AssignmentCreateSerializer.Meta):
         model = Assignment
@@ -320,6 +331,12 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
             'reviewees_list',
             'teams_list',
         ]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance is not None:
+            self.fields.pop('uploader',None)
+    
     def get_subtask_list(self,obj):
         subtasks = obj.assignmentsubtask_set.all()
         return AssignmentSubtaskSerializer(subtasks,many = True).data
@@ -339,3 +356,120 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
     def get_teams_list(self,obj):
         teams = obj.assignmentteam_set.all()
         return AssignmentTeamSerializer(teams,many =True).data
+    
+    def update(self, instance, validated_data):
+        uploader = validated_data.get('uploader',None)
+        if uploader is not None:
+            raise serializers.ValidationError("You can't update this field")
+        
+        request_data = self.context['request'].data
+
+        
+        assignment_details_data = validated_data.pop('assignment_details',[])
+        for i  in range (len(request_data.get('assignment_details'))):
+            if request_data.get('assignment_details')[i].get('id'):
+                assignment_details_data[i]['id'] = request_data.get('assignment_details')[i].get('id')
+
+        
+        subtasks_data = validated_data.pop('subtasks',[])
+        for i  in range (len(request_data.get('subtasks'))):
+            if request_data.get('subtasks')[i].get('id'):
+                subtasks_data[i]['id'] = request_data.get('subtasks')[i].get('id')
+
+                
+        reviewers_data = validated_data.pop('reviewers',[])
+        for i  in range (len(request_data.get('reviewers'))):
+            if request_data.get('reviewers')[i].get('id'):
+                reviewers_data[i]['id'] = request_data.get('reviewers')[i].get('id')
+
+        reviewees_data = validated_data.pop('reviewees',[])
+        for i  in range (len(request_data.get('reviewees'))):
+            if request_data.get('reviewees')[i].get('id'):
+                reviewees_data[i]['id'] = request_data.get('reviewees')[i].get('id')
+                
+        teams_data = validated_data.pop('teams',[])
+        for i  in range (len(request_data.get('teams'))):
+            if request_data.get('teams')[i].get('id'):
+                teams_data[i]['id'] = request_data.get('teams')[i].get('id')
+        
+        instance.title = validated_data.get('title',instance.title) # 'title',
+        instance.description = validated_data.get('description',instance.description) # 'description',
+        instance.iteration_date = validated_data.get('iteration_date',instance.iteration_date) # 'iteration_date',
+        instance.due_date = validated_data.get('due_date',instance.due_date) # 'due_date',
+        
+        if assignment_details_data:
+            self.update_related_fields(instance,assignment_details_data,AssignmentDetails,instance.assignmentdetails_set.all())
+        if subtasks_data:
+            self.update_related_fields(instance,subtasks_data,AssignmentSubtask,instance.assignmentsubtask_set.all())
+            
+        if reviewers_data:
+            self.update_assignment_members(instance,reviewers_data,AssignmentReviewer,instance.assignmentreviewer_set.all())
+        if reviewees_data:
+            self.update_assignment_members(instance,reviewees_data,AssignmentReviewee,instance.assignmentreviewee_set.all())
+            
+        if teams_data:
+            self.update_assignment_teams(instance,teams_data)
+        
+        instance.save()
+        return instance
+
+    def update_related_fields(self,assignment,data,model,curr_data):
+        current_ids = {instance.get('id') for instance in data if instance.get('id') is not None}
+        existing_id = set(curr_data.values_list('id',flat = True))
+        
+        ids_to_delete = existing_id - current_ids
+        
+        if ids_to_delete:
+            model.objects.filter(id__in = ids_to_delete).delete()
+        
+        
+        for instance in data:
+            instance_id = instance.get('id')
+            if instance_id:
+                model_instance = get_object_or_404(model, id=instance_id, assignment=assignment)
+                for key, val in instance.items():
+                    if key == 'id': continue
+                    setattr(model_instance, key, val)
+                model_instance.save()
+            else:
+                new_instance = model(assignment=assignment, **instance)
+                new_instance.save() 
+                
+    def update_assignment_members(self,assignment,data,model,curr_data):
+        current_ids = {instance.get('id') for instance in data if instance.get('id') is not None}
+        existing_id = set(curr_data.values_list('id', flat=True))
+        
+        ids_to_delete = existing_id - current_ids
+        if ids_to_delete:
+            model.objects.filter(id__in=ids_to_delete).delete()
+            
+        for instance in data:
+            instance_id = instance.get('id')
+            if instance_id is None:
+                new_instance = model(assignment=assignment, **instance)
+                new_instance.save()
+    
+    def update_assignment_teams(self,assignment,teams_data):
+        current_team_ids = {team_data.get('id') for team_data in teams_data if team_data.get('id')}
+        existing_team_ids = set(assignment.assignmentteam_set.values_list('id', flat=True))
+        ids_to_delete = existing_team_ids - current_team_ids
+        
+        if ids_to_delete:
+            AssignmentTeam.objects.filter(id__in=ids_to_delete).delete()
+            
+        TeamMember.objects.filter(team__assignment=assignment).delete()
+
+        for team_data in teams_data:
+            members_data = team_data.pop('members', [])
+            team_id = team_data.get('id')
+
+            if team_id:
+                team = AssignmentTeam.objects.get(id=team_id, assignment=assignment)
+                for attr, value in team_data.items():
+                    setattr(team, attr, value)
+                team.save()
+            else:
+                team = AssignmentTeam.objects.create(assignment=assignment, **team_data)
+
+            for member_data in members_data:
+                TeamMember.objects.create(team=team, **member_data)

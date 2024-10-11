@@ -226,8 +226,8 @@ class SubSpaceListSerializer(serializers.ModelSerializer):
 
 
 class SubSpaceDetailUpdateSerializer(SubSpaceCreateSerializer):
-    reviewers_list = serializers.SerializerMethodField()
-    reviewees_list = serializers.SerializerMethodField()
+    reviewers_list = serializers.SerializerMethodField(read_only = True)
+    reviewees_list = serializers.SerializerMethodField(read_only = True)
     sub_space_id = serializers.SerializerMethodField()
     space = serializers.PrimaryKeyRelatedField(read_only = True)
     space_name = serializers.CharField(source='space.space_name', read_only = True)

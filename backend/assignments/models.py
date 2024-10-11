@@ -31,7 +31,7 @@ class Assignment(models.Model):
         return self.assignmentteam_set.count()
     
     def __str__(self) -> str:
-        return f"{self.title}"
+        return f"{self.id} {self.title}"
     
 
 class AssignmentDetails(models.Model):
@@ -40,7 +40,7 @@ class AssignmentDetails(models.Model):
     description = models.TextField(null = True,blank=True)
     
     def __str__(self) -> str:
-        return f"{self.title}"
+        return f"{self.id} {self.title}"
 
 class AssignmentSubtask(models.Model):
     COMPULSORY = 'compulsory'
@@ -57,7 +57,7 @@ class AssignmentSubtask(models.Model):
     tag = models.CharField(max_length=50,choices=SUBTASK_TAGS,default=OPTIONAL)
 
     def __str__(self) -> str:
-        return f"{self.title}"
+        return f"{self.id} {self.title}"
     
 class AssignmentReviewer(models.Model):
     assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE)
@@ -67,7 +67,7 @@ class AssignmentReviewer(models.Model):
         unique_together = [('assignment','reviewer')]
         
     def __str__(self) -> str:
-        return f"{self.assignment.title} --> {self.reviewer.space_member.user.username}"
+        return f"{self.id} {self.assignment.title} --> {self.reviewer.space_member.user.username}"
 
 class AssignmentReviewee(models.Model):
     SUBMITTED = 'submitted'
@@ -90,7 +90,7 @@ class AssignmentReviewee(models.Model):
         return self.assignmentsubmission_set.count()
         
     def __str__(self) -> str:
-        return f"{self.assignment.title} --> {self.reviewee.space_member.user.username}"
+        return f"{self.id} {self.assignment.title} --> {self.reviewee.space_member.user.username}"
         
 class AssignmentTeam(models.Model):
     SUBMITTED = 'submitted'
@@ -114,7 +114,7 @@ class AssignmentTeam(models.Model):
         return self.assignmentsubmission_set.count()
         
     def __str__(self) -> str:
-        return f"{self.assignment.title} --> {self.team_name}"
+        return f"{self.id} {self.assignment.title} --> {self.team_name}"
 
 class TeamMember(models.Model):
     team = models.ForeignKey(AssignmentTeam,on_delete=models.CASCADE)
@@ -132,4 +132,4 @@ class TeamMember(models.Model):
         unique_together = [('team','member')]
         
     def __str__(self) -> str:
-        return f"{self.member.space_member.user.username}"
+        return f"{self.id} {self.member.space_member.user.username}"

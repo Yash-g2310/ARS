@@ -2,7 +2,7 @@ from rest_framework import permissions
 from .models import SubSpace,SubSpaceMember
 from spaces.models import Space
     
-class IsSubSpaceReviewerElseForbidden(permissions.BasePermission):
+class IsSubSpaceReviewerOrMemberElseForbidden(permissions.BasePermission):
     def has_permission(self, request, view):
         space_id = view.kwargs.get('pk',None)
         sub_space_id = view.kwargs.get('id',None)
@@ -19,7 +19,6 @@ class IsSubSpaceReviewerElseForbidden(permissions.BasePermission):
             return False
         
         sub_space_member = sub_space.subspacemember_set.filter(space_member__user=user).first()
-        print(sub_space_member)
         if request.method in permissions.SAFE_METHODS:
             return user == space.owner or sub_space_member is not None
         else:
