@@ -42,18 +42,10 @@ class IsVisibleOrMemberElseForbidden(permissions.BasePermission):
         if obj.visible_to_all:
             return super().has_permission(request, view)
         
-        print("_________________")
-        print(obj.visible_to_all)
-        
         is_reviewer = AssignmentReviewer.objects.filter(assignment = obj, reviewer__space_member__user = user).exists()
         is_reviewee = AssignmentReviewee.objects.filter(assignment = obj, reviewee__space_member__user = user).exists()
         is_team = TeamMember.objects.filter(team__assignment = obj,member__space_member__user =user).exists()
-        
-        print("isrever",is_reviewer)
-        print("isrevee",is_reviewee)
-        print("isteam",is_team)
         print(is_reviewee or is_reviewer or is_team)
-        print("---------")
         
         return is_reviewee or is_reviewer or is_team
         

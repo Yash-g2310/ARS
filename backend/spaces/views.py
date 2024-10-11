@@ -25,10 +25,15 @@ class SpaceCreateView(generics.CreateAPIView):
     queryset = Space.objects.all()
     serializer_class = SpaceCreateDetailSerializer
 
-class SpaceDetailView(generics.RetrieveUpdateAPIView):
+class SpaceDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Space.objects.all()
     serializer_class = SpaceCreateDetailSerializer
     lookup_field = 'pk'
+    
+    def destroy(self, request, *args, **kwargs):
+        space = self.get_object()
+        self.perform_destroy(space)
+        return Response({"details":"space deleted successfully"},status=status.HTTP_204_NO_CONTENT)
     
 class JoinSpaceRequestView(generics.CreateAPIView):
     serializer_class = SpaceJoinRequestSerializer
@@ -224,7 +229,7 @@ class SubSpaceListView(generics.ListAPIView):
         context['space_id']  = self.kwargs.get('pk')
         return context
     
-class SubSpaceDetailView(generics.RetrieveUpdateAPIView):
+class SubSpaceDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SubSpaceDetailUpdateSerializer
     lookup_field = 'id'
     queryset = SubSpace.objects.all()
@@ -236,6 +241,11 @@ class SubSpaceDetailView(generics.RetrieveUpdateAPIView):
         space = get_object_or_404(Space, id=space_id)
         context['space'] = space
         return context
+    
+    def destroy(self, request, *args, **kwargs):
+        subspace = self.get_object()
+        self.perform_destroy(subspace)
+        return Response({"details":"space deleted successfully"},status=status.HTTP_204_NO_CONTENT)
     
 class SubSpaceMembersListView(generics.ListAPIView):
     serializer_class = SubSpaceMemberSerializer

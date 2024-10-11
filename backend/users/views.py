@@ -8,7 +8,7 @@ from rest_framework import status
 # from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
-from .serializers import UserSerializer, UserProfileSerializer,RestrictedUserProfileSerializer,ChangePasswordSerializer,ChangeUsernameSerializer
+from .serializers import UserSerializer, UserProfileSerializer,RestrictedUserProfileSerializer,ChangePasswordSerializer,ChangeUsernameSerializer,UserDestroySerializer
 from .models import UserProfile
 from .permissions import IsOwnerOrReadOnly,IsNotAuthenticated,IsOwnerOrForbidden
 from .utility import getUserInfo
@@ -139,3 +139,12 @@ class ChangeUsernameView(APIView):
         user.username = serializer.validated_data['new_username']
         user.save()
         return Response({"detail":"Username updated successfully"},status=status.HTTP_200_OK)
+    
+class UserDeleteView(generics.DestroyAPIView):
+    serializer_class = UserDestroySerializer
+    queryset = User.objects.all()
+    lookup_field = 'username'
+    def destroy(self, request, *args, **kwargs):
+        user = self.get_object()
+        self.perform_destroy(user)
+        return Response({"details":"user deleted successfully"},status=status.HTTP_204_NO_CONTENT)

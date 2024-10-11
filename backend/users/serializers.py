@@ -138,3 +138,8 @@ class ChangeUsernameSerializer(serializers.Serializer):
         if User.objects.filter(username = val).exists():
             raise serializers.ValidationError("user with same username already exist, please try again")
         return val
+    
+class UserDestroySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = []

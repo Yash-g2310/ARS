@@ -9,7 +9,7 @@ urlpatterns = [
     path('login/',views.LoginView.as_view(),name="log_in"),
     path('logout/',views.LogoutView.as_view(),name="log_out"),
     path('<str:user__username>/profile/',views.UserProfileDetailView.as_view(),name='profile_details'),
-    path('<str:username>/profile/change_password/',views.ChangePasswordView.as_view(),name='change_pass'),
-    path('<str:username>/profile/change_username/',views.ChangeUsernameView.as_view(),name='change_username'),
-    # path('<str:username>/',views.UserProfileListView.as_view(),name='user'),
+    path('<str:username>/profile/change-password/',views.ChangePasswordView.as_view(),name='change_pass'),
+    path('<str:username>/profile/change-username/',views.ChangeUsernameView.as_view(),name='change_username'),
+    path('<str:username>/delete/',views.UserDeleteView.as_view(),name='user_delete'),
 ]

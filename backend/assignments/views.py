@@ -57,7 +57,7 @@ class AssignmentListView(generics.ListAPIView):
         context['sub_space_member']  = sub_space_member
         return context
     
-class AssignmentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+class AssignmentRetrieveUpdateView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AssignmentRetrieveUpdateSerializer
     permission_classes = [IsSubSpaceReviewerOrMemberElseForbidden,IsVisibleOrMemberElseForbidden]
     queryset = Assignment.objects.prefetch_related(
@@ -79,8 +79,10 @@ class AssignmentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
         context['assignment_id'] = self.kwargs.get('assignment_id')
         return context
     
-    def put(self, request, *args, **kwargs):
-        return super().put(request, *args, **kwargs)
+    def destroy(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        self.perform_destroy(assignment)
+        return Response({"details":"assignment deleted successfully"},status=status.HTTP_204_NO_CONTENT)
 
 class AssignmentMembersView(generics.RetrieveAPIView):
     serializer_class=AssignmentMemberSerializer
