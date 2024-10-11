@@ -8,4 +8,5 @@ urlpatterns = [
     path('',views.AssignmentListView.as_view(),name = 'assignment_list'),
     path('<int:assignment_id>/details/',views.AssignmentRetrieveUpdateView.as_view(),name='get_update_assignment'),
     path('<int:assignment_id>/members/',views.AssignmentMembersView.as_view(),name='get_assignment_members'),
+    path('<int:assignment_id>/', include(('submissions.urls', 'submissions'), namespace='submissions')),
 ]

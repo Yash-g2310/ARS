@@ -31,7 +31,24 @@ class AssignmentSubmission(models.Model):
             raise ValidationError("You can either set 'assignment_team' or 'assignment_reviewee', not both.")
         if not self.assignment_reviewee and not self.assignment_team:
             raise ValidationError("Atleast one of 'assignment_reviewee' or 'assignment_team' must be set.")
+        
+        self.other_clean()
+        
         super().clean()
+        
+    def other_clean(self):
+        
+        if self.assignment_reviewee:
+            existing_submissions = AssignmentSubmission.objects.filter(assignment_reviewee = self.assignment_reviewee).exclude(id = self.id)
+            entity = self.assignment_reviewee.reviewee.space_member.user.username
+        else:
+            existing_submissions = AssignmentSubmission.objects.filter(assignment_team = self.assignment_team).exclude(id = self.id)
+            entity = self.assignment_team.team_name
+            
+        if existing_submissions.filter(status = AssignmentSubmission.COMPLETED).exists():
+            raise ValidationError(f"{entity} is already completed the assignment, no further submissions are allowed")
+        if existing_submissions.filter(status__in = [AssignmentSubmission.IN_PROGRESS,AssignmentSubmission.NOT_STARTED]).exists() and self.status in [AssignmentSubmission.IN_PROGRESS,AssignmentSubmission.NOT_STARTED]:
+            raise ValidationError("An assignment submission is already in progress or not started. Complete or review the existing submission before starting a new one.")
     
     def save(self, *args, **kwargs) -> None:
         self.clean()
