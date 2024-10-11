@@ -1,35 +1,56 @@
 from rest_framework import serializers
 from .models import Assignment,AssignmentDetails,AssignmentSubtask,AssignmentReviewer,AssignmentReviewee,AssignmentTeam,TeamMember
 from spaces.models import SubSpaceMember,SubSpace
+from spaces.serializers import SubSpaceMemberSerializer
 from django.db import transaction
 
 class AssignmentDetailsSerializer(serializers.ModelSerializer):
+    assignment_id = serializers.SerializerMethodField(read_only = True)
     class Meta:
         model = AssignmentDetails
         fields = [
-            # 'assignment',
+            'assignment_id',
             'title',
             'description',
         ]
+    def get_assignment_id(self,obj):
+        return obj.assignment.id if obj.assignment else None
 
 class AssignmentSubtaskSerializer(serializers.ModelSerializer):
+    assignment_id = serializers.SerializerMethodField(read_only = True)
     class Meta:
         model = AssignmentSubtask
         fields = [
-            # 'assignment',
+            'assignment_id',
             'title',
             'description',
             'tag',
         ]
+        extra_kwargs = {
+            'tag': {'read_only':True}
+        }
+        
+    def get_assignment_id(self,obj):
+        return obj.assignment.id if obj.assignment else None
 
 class AssignmentReviewerSerializer(serializers.ModelSerializer):
-    reviewer_id = serializers.IntegerField()
+    assignment_id = serializers.SerializerMethodField(read_only = True)
+    reviewer_id = serializers.IntegerField(write_only = True)
+    reviewer = SubSpaceMemberSerializer()
     class Meta:
         model = AssignmentReviewer
         fields = [
-            # 'assignment',
+            'assignment_id',
             'reviewer_id',
+            "reviewer",
         ]
+        extra_kwargs = {
+            'reviewer' : {'read_only':True},
+        }
+        
+    def get_assignment_id(self,obj):
+        return obj.assignment.id if obj.assignment else None
+    
     def validate_reviewer_id(self,val):
         sub_space_id = self.context.get('sub_space_id')
         if not sub_space_id:
@@ -39,15 +60,28 @@ class AssignmentReviewerSerializer(serializers.ModelSerializer):
         else: return val
 
 class AssignmentRevieweeSerializer(serializers.ModelSerializer):
-    reviewee_id = serializers.IntegerField()
+    assignment_id = serializers.SerializerMethodField(read_only = True)
+    reviewee_id = serializers.IntegerField(write_only = True)
+    reviewee = SubSpaceMemberSerializer()
     class Meta:
         model = AssignmentReviewee
         fields = [
-            # 'assignment',
+            'assignment_id',
             'reviewee_id',
             'reviewee_status',
-            'submission_count'
+            'submission_count',
+            'reviewee',
+            
         ]
+        
+        extra_kwargs = {
+            'reviewee':{'read_only':True},
+            'reviewee_status' : {'read_only':True},
+        }
+        
+    def get_assignment_id(self,obj):
+        return obj.assignment.id if obj.assignment else None
+    
     def validate_reviewee_id(self,val):
         sub_space_id = self.context.get('sub_space_id')
         if not sub_space_id:
@@ -58,13 +92,19 @@ class AssignmentRevieweeSerializer(serializers.ModelSerializer):
             
 class TeamMemberSerializer(serializers.ModelSerializer):
     team = serializers.PrimaryKeyRelatedField(read_only = True)
-    member_id = serializers.IntegerField()
+    member_id = serializers.IntegerField(write_only = True)
+    member = SubSpaceMemberSerializer()
     class Meta:
         model = TeamMember
         fields = [
             'team',
             'member_id',
+            'member',
         ]
+        extra_kwargs = {
+            'member' :{'read_only':True}
+        }
+    
     def validate_member_id(self,val):
         sub_space_id = self.context.get('sub_space_id')
         if sub_space_id is None:
@@ -82,17 +122,24 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         
 
 class AssignmentTeamSerializer(serializers.ModelSerializer):
-    members = TeamMemberSerializer(many = True)
+    assignment_id = serializers.SerializerMethodField(read_only = True)
+    members = TeamMemberSerializer(many = True,write_only=True)
+    members_list = serializers.SerializerMethodField(read_only = True)
     class Meta:
         model = AssignmentTeam
         fields = [
-            # 'assignment',
+            'assignment_id',
             'team_name',
+            'team_status',
             'member_count',
             'submission_count',
-            'team_status',
             'members',
+            'members_list',
         ]
+        
+    def get_assignment_id(self,obj):
+        return obj.assignment.id if obj.assignment else None
+    
     def create(self, validated_data):
         members_data = validated_data.pop('members',[])
         if not members_data:
@@ -108,6 +155,10 @@ class AssignmentTeamSerializer(serializers.ModelSerializer):
                 
             TeamMember.objects.create(team = team , member = member)
         return team
+    
+    def get_members_list(self,obj):
+        members = obj.teammember_set.all()
+        return TeamMemberSerializer(members,many = True).data
 
 class AssignmentCreateSerializer(serializers.ModelSerializer):
     uploader = serializers.PrimaryKeyRelatedField(read_only = True)
@@ -250,12 +301,12 @@ class AssignmentListSerializer(serializers.ModelSerializer):
             return 'team'
         return "not part of this assignment"
     
-class AssignmentDetailUpdateSerializer(AssignmentCreateSerializer):
-    subtask_list = AssignmentSubtaskSerializer(many = True,read_only = True)
-    assignment_detail_list = AssignmentDetailsSerializer(many = True,read_only = True)
-    reviewers_list = AssignmentReviewerSerializer(many = True,read_only = True)
-    reviewees_list = AssignmentRevieweeSerializer(many = True,read_only = True)
-    teams_list = AssignmentTeamSerializer(many = True,read_only = True)
+class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
+    subtask_list = serializers.SerializerMethodField()
+    assignment_detail_list = serializers.SerializerMethodField()
+    reviewers_list = serializers.SerializerMethodField()
+    reviewees_list = serializers.SerializerMethodField()
+    teams_list = serializers.SerializerMethodField()
     
     class Meta(AssignmentCreateSerializer.Meta):
         model = Assignment
@@ -269,3 +320,22 @@ class AssignmentDetailUpdateSerializer(AssignmentCreateSerializer):
             'reviewees_list',
             'teams_list',
         ]
+    def get_subtask_list(self,obj):
+        subtasks = obj.assignmentsubtask_set.all()
+        return AssignmentSubtaskSerializer(subtasks,many = True).data
+    
+    def get_assignment_detail_list(self,obj):
+        assignment_details = obj.assignmentdetails_set.all()
+        return AssignmentDetailsSerializer(assignment_details,many = True).data
+    
+    def get_reviewers_list(self,obj):
+        reviewers = obj.assignmentreviewer_set.all()
+        return AssignmentReviewerSerializer(reviewers,many =True).data
+    
+    def get_reviewees_list(self,obj):
+        reviewees = obj.assignmentreviewee_set.all()
+        return AssignmentRevieweeSerializer(reviewees,many = True).data
+    
+    def get_teams_list(self,obj):
+        teams = obj.assignmentteam_set.all()
+        return AssignmentTeamSerializer(teams,many =True).data

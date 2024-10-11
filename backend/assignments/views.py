@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Assignment
-from .serializers import AssignmentCreateSerializer,AssignmentListSerializer
+from .serializers import AssignmentCreateSerializer,AssignmentListSerializer,AssignmentRetrieveUpdateSerializer
 from .permissions import IsSubSpaceReviewerElseForbidden
 from django.utils import timezone
 from django.shortcuts import redirect,get_object_or_404
@@ -36,4 +36,14 @@ class AssignmentListView(generics.ListAPIView):
         context['sub_space_member']  = sub_space_member
         return context
     
-# class AssignmentDetailUpdateView(generics.RetrieveAPIView):
+class AssignmentRetrieveUpdateView(generics.RetrieveAPIView):
+    serializer_class = AssignmentRetrieveUpdateSerializer
+    # permission_classes = [IsSubSpaceReviewerElseForbidden]
+    queryset = Assignment.objects.prefetch_related(
+        'assignmentsubtask_set', 
+        'assignmentdetails_set', 
+        'assignmentreviewer_set',
+        'assignmentreviewee_set', 
+        'assignmentteam_set'
+    )
+    lookup_field = 'id'

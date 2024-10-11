@@ -82,12 +82,12 @@ class AssignmentReviewee(models.Model):
     reviewee = models.ForeignKey(SubSpaceMember,on_delete=models.CASCADE)
     reviewee_status = models.CharField(max_length=40, choices=REVIEWEE_STATUS_LIST,default=NOT_SUBMITTED)
     
+    class Meta:
+        unique_together = [('assignment','reviewee')]
+
     @property
     def submission_count(self):
         return self.assignmentsubmission_set.count()
-
-    class Meta:
-        unique_together = [('assignment','reviewee')]
         
     def __str__(self) -> str:
         return f"{self.assignment.title} --> {self.reviewee.space_member.user.username}"

@@ -1,4 +1,6 @@
+from typing import Iterable
 from django.db import models
+from django.core.exceptions import ValidationError
 from assignments.models import AssignmentReviewee,AssignmentTeam,AssignmentReviewer,AssignmentSubtask
 from django.utils import timezone
 # Create your models here.
@@ -22,6 +24,18 @@ class AssignmentSubmission(models.Model):
     status = models.CharField(max_length=50,choices=ASSIGNMENT_SUBMISSION_STATUS,default=NOT_STARTED)
     reviewee_comment = models.TextField(null=True,blank=True)
     reviewer_comment = models.TextField(null=True,blank=True)
+    
+    def clean(self) -> None:
+        
+        if self.assignment_reviewee and self.assignment_team:
+            raise ValidationError("You can either set 'assignment_team' or 'assignment_reviewee', not both.")
+        if not self.assignment_reviewee and not self.assignment_team:
+            raise ValidationError("Atleast one of 'assignment_reviewee' or 'assignment_team' must be set.")
+        super().clean()
+    
+    def save(self, *args, **kwargs) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
     
 class SubtaskStatus(models.Model):
     COMPLETED = "completed"

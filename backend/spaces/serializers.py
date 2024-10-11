@@ -126,13 +126,16 @@ class SendSpaceInvitationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f'user with email {email} is already a part of the space')
         
         return data
-    
+
 class SpaceMemberSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = SpaceMember
         fields = ['space','user',]
-        
+        extra_kwargs = {
+            'user':{'read_only':True}
+        }
+
 
 class SubSpaceMemberSerializer(serializers.ModelSerializer):
     space_member_id = serializers.PrimaryKeyRelatedField(queryset = SpaceMember.objects.all())
