@@ -1,10 +1,11 @@
-from rest_framework import generics
+from rest_framework import generics,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Assignment
-from .serializers import AssignmentCreateSerializer,AssignmentListSerializer,AssignmentRetrieveUpdateSerializer
-from .permissions import IsSubSpaceReviewerOrMemberElseForbidden
+from .models import Assignment,AssignmentReviewee,AssignmentReviewer,AssignmentTeam,TeamMember
+from .serializers import AssignmentCreateSerializer,AssignmentListSerializer,AssignmentRetrieveUpdateSerializer,AssignmentMemberSerializer
+from .permissions import IsSubSpaceReviewerOrMemberElseForbidden,IsVisibleOrMemberElseForbidden
 from django.utils import timezone
+from django.db.models import Q
 from django.shortcuts import redirect,get_object_or_404
 from spaces.models import SubSpace,SubSpaceMember
 # Create your views here.
@@ -24,10 +25,30 @@ class AssignmentListView(generics.ListAPIView):
     serializer_class =AssignmentListSerializer
     permission_classes = [IsSubSpaceReviewerOrMemberElseForbidden]
     lookup_field = 'id'
+    
     def get_queryset(self):
         sub_space_id = self.kwargs.get('id')
-        queryset =Assignment.objects.filter(sub_space = sub_space_id)
+        # space_id = self.kwargs.get('pk')
+        
+        # space_member = Space
+        
+        user = self.request.user
+        visible_assignments =Q(sub_space=sub_space_id, visible_to_all=True)
+        try:
+            sub_space_member = SubSpaceMember.objects.get(space_member__user = user, sub_space = sub_space_id)
+        except SubSpaceMember.DoesNotExist:
+            return Response({"error":"sub_space_member not found"},status=status.HTTP_404_NOT_FOUND)
+        
+        user_related_assignments = Q(
+            id__in = AssignmentReviewer.objects.filter(reviewer = sub_space_member).values_list('assignment',flat=True)
+        ) | Q(
+            id__in = AssignmentReviewee.objects.filter(reviewee = sub_space_member).values_list('assignment', flat=True)
+        ) | Q(
+            id__in=AssignmentTeam.objects.filter(id__in=TeamMember.objects.filter(member=sub_space_member).values_list('team', flat=True)).values_list('assignment', flat=True)
+        )
+        queryset = Assignment.objects.filter(visible_assignments | user_related_assignments)
         return queryset.distinct()
+    
     def get_serializer_context(self):
         context =  super().get_serializer_context()
         sub_space_id = self.kwargs.get('id')
@@ -38,7 +59,7 @@ class AssignmentListView(generics.ListAPIView):
     
 class AssignmentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     serializer_class = AssignmentRetrieveUpdateSerializer
-    permission_classes = [IsSubSpaceReviewerOrMemberElseForbidden]
+    permission_classes = [IsSubSpaceReviewerOrMemberElseForbidden,IsVisibleOrMemberElseForbidden]
     queryset = Assignment.objects.prefetch_related(
         'assignmentsubtask_set', 
         'assignmentdetails_set', 
@@ -60,3 +81,12 @@ class AssignmentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
+
+class AssignmentMembersView(generics.RetrieveAPIView):
+    serializer_class=AssignmentMemberSerializer
+    permission_classes = [IsSubSpaceReviewerOrMemberElseForbidden,IsVisibleOrMemberElseForbidden]
+    queryset = Assignment.objects.all()
+    
+    def get_object(self):
+        assignment_id = self.kwargs.get('assignment_id')
+        return generics.get_object_or_404(self.get_queryset(), id=assignment_id)

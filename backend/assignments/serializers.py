@@ -193,6 +193,7 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
             'iteration_date',
             'due_date',
             'updated_at',
+            'visible_to_all',
             'assignment_details',
             'subtasks',
             'reviewers',
@@ -442,13 +443,13 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
         ids_to_delete = existing_id - current_ids
         if ids_to_delete:
             model.objects.filter(id__in=ids_to_delete).delete()
-            
+
         for instance in data:
             instance_id = instance.get('id')
             if instance_id is None:
                 new_instance = model(assignment=assignment, **instance)
                 new_instance.save()
-    
+
     def update_assignment_teams(self,assignment,teams_data):
         current_team_ids = {team_data.get('id') for team_data in teams_data if team_data.get('id')}
         existing_team_ids = set(assignment.assignmentteam_set.values_list('id', flat=True))
@@ -473,3 +474,23 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
 
             for member_data in members_data:
                 TeamMember.objects.create(team=team, **member_data)
+                
+class AssignmentMemberSerializer(serializers.ModelSerializer):
+    assignment_reviewers = serializers.SerializerMethodField()
+    assignment_reviewees = serializers.SerializerMethodField()
+    assignment_teams = serializers.SerializerMethodField()
+    class Meta:
+        model = Assignment
+        fields = ['assignment_reviewers','assignment_reviewees','assignment_teams',]
+        
+    def get_assignment_reviewers(self,obj):
+        reviewers = obj.assignmentreviewer_set.all()
+        return AssignmentReviewerSerializer(reviewers,many =True).data
+    
+    def get_assignment_reviewees(self,obj):
+        reviewees = obj.assignmentreviewee_set.all()
+        return AssignmentRevieweeSerializer(reviewees,many = True).data
+    
+    def get_assignment_teams(self,obj):
+        teams = obj.assignmentteam_set.all()
+        return AssignmentTeamSerializer(teams,many =True).data

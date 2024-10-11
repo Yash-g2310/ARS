@@ -14,6 +14,7 @@ class Assignment(models.Model):
     iteration_date = models.DateTimeField(null=True,blank=True)
     due_date = models.DateTimeField(null=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+    visible_to_all = models.BooleanField(default= True)
     
     @property
     def subtask_count(self):
