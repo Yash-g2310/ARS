@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from rest_framework import generics
-from submissions.serializers.serializers import AssignmentStatusSerializer,AssignmentSubmitSerializer,SubmissionListSerializer
+from submissions.serializers.serializers import AssignmentStatusSerializer,AssignmentSubmitSerializer,SubmissionListSerializer,SubmissionDetailSerializer
 from django.shortcuts import get_object_or_404
 from assignments.models import Assignment
 from assignments.permissions import IsSubSpaceReviewerOrMemberElseForbidden,IsVisibleOrMemberElseForbidden
-from .permissions import IsAssignmentRevieweeOrTeamElseForbidden,IsAssignmentReviewerElseForbidden,IsAssignmentRevieweeTeamOrReviewerElseForbidden
+from .permissions import IsAssignmentRevieweeOrTeamElseForbidden,IsAssignmentReviewerElseForbidden,IsAssignmentRevieweeTeamOrReviewerElseForbidden,SubmissionDetailPermission
 from .models import AssignmentSubmission
 # from assignments.permissions import Is
 # Create your views here.
@@ -60,3 +60,16 @@ class AssignmentSubmissionListView(generics.ListAPIView):
             queryset = AssignmentSubmission.objects.filter(assignment_team = assignment_team_id)
         return queryset.distinct()
 
+class SubmissionDetailView(generics.RetrieveAPIView):
+    serializer_class = SubmissionDetailSerializer
+    permission_classes = [SubmissionDetailPermission]
+    lookup_field = 'submission_id'
+    queryset = AssignmentSubmission.objects.all()
+    
+    def get_object(self):
+        lookup_val = self.kwargs[self.lookup_field]
+        return get_object_or_404(self.get_queryset(),id = lookup_val)
+    def get_serializer_context(self):
+        context =  super().get_serializer_context()
+        context['submission_id'] = self.kwargs.get('submission_id')
+        return context

@@ -133,3 +133,30 @@ class SubmissionListSerializer(serializers.ModelSerializer):
         if obj.assignment_reviewee:
             return obj.assignment_reviewee.reviewee.space_member.user.username
         return ""
+    
+class SubmissionDetailSerializer(serializers.ModelSerializer):
+    reviewed_by = serializers.SerializerMethodField()
+    subtask_comments = serializers.SerializerMethodField()
+    class Meta:
+        model = AssignmentSubmission
+        fields = [
+            'id',
+            'assignment_reviewee',
+            'assignment_team',
+            'submitted_at',
+            "reviewed_by",
+            "status",
+            "reviewee_comment",
+            "reviewer_comment",
+            'subtask_comments',
+        ]
+        
+    def get_reviewed_by(self,obj):
+        if obj.assignment_reviewer:
+            return obj.assignment_reviewer.reviewer.space_member.user.username
+        return None
+    
+    def get_subtask_comments(self,obj):
+        assignment_submission_id = self.context.get('submission_id')
+        subtask_comments = SubtaskSubmission.objects.filter(assignment_submission = assignment_submission_id)
+        return SubtaskSubmitSerializer(subtask_comments,many =True).data

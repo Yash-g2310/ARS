@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from assignments.models import AssignmentReviewee,TeamMember,AssignmentReviewer
 from django.db.models import Q
+from .models import AssignmentSubmission
 
 class IsAssignmentRevieweeOrTeamElseForbidden(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -67,3 +68,24 @@ class IsAssignmentRevieweeTeamOrReviewerElseForbidden(permissions.BasePermission
             ).exists()
         )
         return is_authorized
+    
+    
+class SubmissionDetailPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        assignment_submission_id = view.kwargs.get('submission_id')
+        assignment_id = view.kwargs.get('assignment_id')
+        try:
+            assignment_submission = AssignmentSubmission.objects.get(id = assignment_submission_id)
+        except AssignmentSubmission.DoesNotExist:
+            return False
+        if assignment_submission.assignment_reviewee:
+            is_reviewee = assignment_submission.assignment_reviewee.reviewee.space_member.user == request.user
+        else: is_reviewee= False
+        if assignment_submission.assignment_team:
+            assignment_team = assignment_submission.assignment_team
+            is_team = TeamMember.objects.filter(team = assignment_team, member__space_member__user =request.user).exists()
+        else: is_team = False
+        is_reviewer = AssignmentReviewer.objects.filter(assignment = assignment_id,reviewer__space_member__user = request.user)
+        
+        return is_reviewee or is_reviewer or is_team
+        
