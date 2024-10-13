@@ -4,7 +4,7 @@ from submissions.serializers.serializers import AssignmentStatusSerializer,Assig
 from django.shortcuts import get_object_or_404
 from assignments.models import Assignment
 from assignments.permissions import IsSubSpaceReviewerOrMemberElseForbidden,IsVisibleOrMemberElseForbidden
-from .permissions import IsAssignmentRevieweeOrTeamElseForbidden,IsAssignmentReviewerElseForbidden
+from .permissions import IsAssignmentRevieweeOrTeamElseForbidden,IsAssignmentReviewerElseForbidden,IsAssignmentRevieweeTeamOrReviewerElseForbidden
 from .models import AssignmentSubmission
 # from assignments.permissions import Is
 # Create your views here.
@@ -37,8 +37,26 @@ class AssignmentSubmitTeamView(generics.CreateAPIView):
     
 class AssignmentSubmissionListView(generics.ListAPIView):
     serializer_class = SubmissionListSerializer
-    permission_classes = [IsAssignmentReviewerElseForbidden]
+    
+    def get_permissions(self):
+        assignment_reviewee_id = self.kwargs.get('assignment_reviewee_id')
+        assignment_team_id = self.kwargs.get('assignment_team_id')
+        if not (assignment_reviewee_id or assignment_team_id):
+            self.permission_classes = [IsAssignmentReviewerElseForbidden]
+        else:
+            self.permission_classes = [IsAssignmentRevieweeTeamOrReviewerElseForbidden]
+        return super().get_permissions()
+    
     def get_queryset(self):
-        queyset = AssignmentSubmission.objects.filter(assignment_reviewee__assignment = self.kwargs.get("assignment_id")) | AssignmentSubmission.objects.filter(assignment_team__assignment = self.kwargs.get("assignment_id"))
+        assignment_id = self.kwargs.get("assignment_id")
+        assignment_reviewee_id = self.kwargs.get('assignment_reviewee_id')
+        assignment_team_id = self.kwargs.get('assignment_team_id')
         
-        return queyset.distinct()
+        if not (assignment_team_id or assignment_reviewee_id):
+            queryset = AssignmentSubmission.objects.filter(assignment_reviewee__assignment = assignment_id) | AssignmentSubmission.objects.filter(assignment_team__assignment = assignment_id)
+        elif assignment_reviewee_id and not assignment_team_id:
+            queryset = AssignmentSubmission.objects.filter(assignment_reviewee = assignment_reviewee_id)
+        elif assignment_team_id and not assignment_reviewee_id:
+            queryset = AssignmentSubmission.objects.filter(assignment_team = assignment_team_id)
+        return queryset.distinct()
+
