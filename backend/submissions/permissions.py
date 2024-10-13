@@ -88,4 +88,27 @@ class SubmissionDetailPermission(permissions.BasePermission):
         is_reviewer = AssignmentReviewer.objects.filter(assignment = assignment_id,reviewer__space_member__user = request.user)
         
         return is_reviewee or is_reviewer or is_team
-        
+
+class ReviewNotStartedElseForbidden(permissions.BasePermission):
+    def has_permission(self, request, view):
+        submission_id = view.kwargs.get('submission_id')
+        if not submission_id:
+            return False
+        try:
+            submission = AssignmentSubmission.objects.get(id = submission_id)
+        except AssignmentSubmission.DoesNotExist:
+            return False
+        return submission.status==AssignmentSubmission.NOT_STARTED
+
+class ReviewerWithReviewInProgress(permissions.BasePermission):
+    def has_permission(self, request, view):
+        submission_id = view.kwargs.get('submission_id')
+        if not submission_id:
+            return False
+        try:
+            submission = AssignmentSubmission.objects.get(id = submission_id)
+        except AssignmentSubmission.DoesNotExist:
+            return False
+        return submission.assignment_reviewer.reviewer.space_member.user == request.user and submission.status == AssignmentSubmission.IN_PROGRESS
+
+    

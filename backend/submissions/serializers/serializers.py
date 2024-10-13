@@ -98,9 +98,12 @@ class AssignmentSubmitSerializer(serializers.ModelSerializer):
         if assignment_reviewee_id:
             assignment_reviewee = AssignmentReviewee.objects.filter(id = assignment_reviewee_id).first()
             validated_data['assignment_reviewee'] = assignment_reviewee
+            assignment_reviewee.reviewee_status = AssignmentReviewee.SUBMITTED
+            assignment_reviewee.save()
         if assignment_team_id:
             assignment_team = AssignmentTeam.objects.filter(id = assignment_team_id).first()
             validated_data['assignment_team'] = assignment_team
+            assignment_team.team_status = AssignmentTeam.SUBMITTED
         
         subtask_comments_data = validated_data.pop('subtask_comments',[])
         with transaction.atomic():
