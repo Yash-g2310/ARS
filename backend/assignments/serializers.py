@@ -4,6 +4,9 @@ from spaces.models import SubSpaceMember,SubSpace
 from spaces.serializers import SubSpaceMemberSerializer
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from attachments.serializers import AttachmentSerializer
+from attachments.models import Attachment
+
 
 # while updating assignment, we need to pass the id with the attributes which need to be updated.
 # since request will always be put so, the attributes which are not found will be deleted
@@ -128,9 +131,7 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         except SubSpaceMember.MultipleObjectsReturned:
             raise serializers.ValidationError("Multiple subspace members found, which should not be the case")
         return val
-        
-
-        
+            
 
 class AssignmentTeamSerializer(serializers.ModelSerializer):
     assignment_id = serializers.SerializerMethodField(read_only = True)
@@ -179,6 +180,7 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
     reviewers = AssignmentReviewerSerializer(many = True,write_only = True)
     reviewees = AssignmentRevieweeSerializer(many = True,write_only = True)
     teams = AssignmentTeamSerializer(many = True, required = False)
+    attachments = AttachmentSerializer(many = True,required = False)
     sub_space = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
@@ -199,6 +201,7 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
             'reviewers',
             'reviewees',
             'teams',
+            'attachments',
         ]
 
     def validate(self, attrs):
@@ -251,6 +254,7 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
         reviewers_data = validated_data.pop('reviewers',[])
         reviewees_data = validated_data.pop('reviewees',[])
         teams_data = validated_data.pop('teams',[])
+        attachments_data = validated_data.pop('attachments',[])
 
         with transaction.atomic():
             assignment = Assignment.objects.create(**validated_data)
@@ -281,6 +285,10 @@ class AssignmentCreateSerializer(serializers.ModelSerializer):
                 team = AssignmentTeam.objects.create(assignment=assignment, **team_data)
                 for member_data in members_data:
                     TeamMember.objects.create(team = team, **member_data)
+
+            # Create attachments
+            for attachment_data in attachments_data:
+                Attachment.objects.create(assignment = assignment,file = attachment_data)
 
         return assignment
 
@@ -319,6 +327,7 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
     reviewers_list = serializers.SerializerMethodField(read_only = True)
     reviewees_list = serializers.SerializerMethodField(read_only = True)
     teams_list = serializers.SerializerMethodField(read_only = True)
+    attachment_list = serializers.SerializerMethodField(read_only = True)
     
     class Meta(AssignmentCreateSerializer.Meta):
         model = Assignment
@@ -331,6 +340,7 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
             'reviewers_list',
             'reviewees_list',
             'teams_list',
+            'attachment_list',
         ]
         
     def __init__(self, *args, **kwargs):
@@ -357,6 +367,10 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
     def get_teams_list(self,obj):
         teams = obj.assignmentteam_set.all()
         return AssignmentTeamSerializer(teams,many =True).data
+    
+    def get_attachment_list(self,obj):
+        teams = obj.attachment_set.all()
+        return AttachmentSerializer(teams,many =True).data
     
     def update(self, instance, validated_data):
         uploader = validated_data.get('uploader',None)

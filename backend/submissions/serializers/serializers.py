@@ -2,6 +2,7 @@ from rest_framework import serializers
 from submissions.models import AssignmentReviewee,AssignmentSubmission,AssignmentTeam,SubtaskStatus,SubtaskSubmission,AssignmentSubtask
 from assignments.models import Assignment
 from django.db import transaction
+from attachments.serializers import Attachment,AttachmentSerializer
 
 
 class AssignmentRevieweeStatusSerializer(serializers.ModelSerializer):
@@ -42,7 +43,7 @@ class SubtaskSubmitSerializer(serializers.ModelSerializer):
     
 class AssignmentSubmitSerializer(serializers.ModelSerializer):
     subtask_comments = SubtaskSubmitSerializer(many = True,write_only = True)
-
+    attachments = AttachmentSerializer(many = True,write_only = False,required = False)
     class Meta:
         model = AssignmentSubmission
         fields = [
@@ -51,6 +52,7 @@ class AssignmentSubmitSerializer(serializers.ModelSerializer):
             'status',
             'reviewee_comment',
             'subtask_comments',
+            'attachments',
         ]
         extra_kwargs = {
             'status':{'read_only':True},
@@ -99,13 +101,18 @@ class AssignmentSubmitSerializer(serializers.ModelSerializer):
             assignment_reviewee = AssignmentReviewee.objects.filter(id = assignment_reviewee_id).first()
             validated_data['assignment_reviewee'] = assignment_reviewee
             assignment_reviewee.reviewee_status = AssignmentReviewee.SUBMITTED
+            assignment = assignment_reviewee.assignment
             assignment_reviewee.save()
         if assignment_team_id:
             assignment_team = AssignmentTeam.objects.filter(id = assignment_team_id).first()
             validated_data['assignment_team'] = assignment_team
             assignment_team.team_status = AssignmentTeam.SUBMITTED
+            assignment = assignment_team.assignment
+            assignment_team.save()
         
         subtask_comments_data = validated_data.pop('subtask_comments',[])
+        attachments_data = validated_data.pop('attachments',[])
+        
         with transaction.atomic():
             assignment_submission = super().create(validated_data)
             for subtask_data in subtask_comments_data:
@@ -114,6 +121,12 @@ class AssignmentSubmitSerializer(serializers.ModelSerializer):
                     assignment_subtask = subtask_data.get('assignment_subtask_id'),
                     reviewee_comment = subtask_data.get('reviewee_comment'),
                 )
+                
+            for attachment_data in attachments_data:
+                Attachment.objects.create(assignment_submission = assignment_submission,
+                                            assignment = assignment,
+                                            file = attachment_data
+                                        )
         return assignment_submission
                 
 
@@ -140,6 +153,7 @@ class SubmissionListSerializer(serializers.ModelSerializer):
 class SubmissionDetailSerializer(serializers.ModelSerializer):
     reviewed_by = serializers.SerializerMethodField()
     subtask_comments = serializers.SerializerMethodField()
+    attachments = serializers.SerializerMethodField()
     class Meta:
         model = AssignmentSubmission
         fields = [
@@ -152,6 +166,7 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
             "reviewee_comment",
             "reviewer_comment",
             'subtask_comments',
+            'attachments',
         ]
         
     def get_reviewed_by(self,obj):
@@ -163,3 +178,8 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
         assignment_submission_id = self.context.get('submission_id')
         subtask_comments = SubtaskSubmission.objects.filter(assignment_submission = assignment_submission_id)
         return SubtaskSubmitSerializer(subtask_comments,many =True).data
+    
+    def get_attachments(self,obj):
+        assignment_submission_id = self.context.get('submission_id')
+        attachments = Attachment.objects.filter(assignment_submission = assignment_submission_id)
+        return AttachmentSerializer(attachments,many =True).data

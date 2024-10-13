@@ -34,6 +34,6 @@ def attachment_upload_path(instance,filename):
     
 
 class Attachment(models.Model):
-    assignment = models.ForeignKey(Assignment,on_delete=models.SET_NULL,null=True,related_name='attachments')
-    assignment_submission = models.ForeignKey(AssignmentSubmission,on_delete=models.SET_NULL,null=True,related_name='attachments')
+    assignment = models.ForeignKey(Assignment,on_delete=models.CASCADE,related_name='attachments')
+    assignment_submission = models.ForeignKey(AssignmentSubmission,on_delete=models.CASCADE,null=True,related_name='attachments')
     file = models.FileField(upload_to=attachment_upload_path)
