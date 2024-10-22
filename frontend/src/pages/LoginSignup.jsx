@@ -7,15 +7,27 @@ const LoginSignup = () => {
     return (
         <div className='flex flex-row w-1/2 justify-center items-center'>
             <div className='w-full'>
-                <LoginSignupHeader/>
+                <LoginSignupHeader />
                 <div className='flex flex-row justify-center items-center p-6'>
-                <button onClick={()=>{setIsLogin(true)}} className={`px-12 tracking-wide rounded-s-full border border-slate-400 hover:outline-none focus:outline-none ${isLogin?'bg-blue-600 tracking-wide text-white': 'bg-white '}`}>Login</button>
-                <button onClick={()=>{setIsLogin(false)}} className={`px-12 rounded-e-full border border-slate-400 hover:outline-none focus:outline-none ${!isLogin?'bg-blue-600 text-white': 'bg-white '}`}>Sign Up</button>
+                    <button
+                        onClick={() => { setIsLogin(true) }}
+                        className={`px-12 tracking-wide rounded-s-full border border-slate-400 hover:outline-none focus:outline-none transition-all duration-300 ${isLogin ? 'bg-blue-600 tracking-wide text-white' : 'bg-white hover:bg-gray-200'}`}>
+                        Login
+                    </button>
+                    <button
+                        onClick={() => { setIsLogin(false) }}
+                        className={`px-12 rounded-e-full border border-slate-400 hover:outline-none focus:outline-none transition-all duration-300 ${!isLogin ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-200'}`}>
+                        Sign Up
+                    </button>
                 </div>
-                {isLogin?<Login/>:<SignUp/>}
+                {isLogin ? <Login /> : <SignUp />}
             </div>
             <div className='hidden w-1/2  h-screen lg:block fixed right-0 top-0'>
-                <img src="/assets/front-image.jpg" alt="front-image " className='object-cover h-full w-full'/>
+                <img
+                    src="/assets/front-image.jpg"
+                    alt="front-image "
+                    className='object-cover h-full w-full'
+                />
             </div>
         </div>
     )

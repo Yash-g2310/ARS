@@ -1,8 +1,25 @@
-import React from 'react'
+import React, { useState } from 'react'
 import '../styles/loginSignupStyles.css'
 import LoginButton from './LoginButton'
+import { useForm } from 'react-hook-form'
+import { Tooltip } from '@mui/material'
+import PasswordEye from './PasswordEye'
 
 const SignUp = () => {
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm({
+        mode:"onChange"
+    })
+
+    const onSubmit = (data) => console.log(data)
+
     return (
         <div>
             <div className="flex min-h-full flex-col justify-center px-6 lg:px-8">
@@ -11,33 +28,159 @@ const SignUp = () => {
                 </div>
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6" action="#" method="POST">
+                    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                         <div className='flex flex-row gap-6'>
-                            <div >
+                            <div className='relative'>
                                 <label htmlFor="firstName" className='form-label' >First Name</label>
-                                <input id='firstName' name='firstName' type="text" autoComplete='firstName' required className='mt-2 form-input'/>
+                                <Tooltip
+                                    title={errors.firstName ? errors.firstName.message : ''}
+                                    placement="bottom-start"
+                                    arrow
+                                    open={!!errors.firstName && watch('firstName')}
+                                >
+                                    <input id='firstName'
+                                        name='firstName'
+                                        type="text"
+                                        autoComplete='firstName'
+                                        required
+                                        className='mt-2 form-input'
+                                        {...register('firstName', {
+                                            pattern: {
+                                                value: /^[A-Za-z]+$/,
+                                                message: "The name should contain letters only"
+                                            }
+                                        })}
+                                    />
+
+                                </Tooltip>
                             </div>
                             <div >
                                 <label htmlFor="lastName" className='form-label' >Last Name</label>
-                                <input id='lastName' name='lastName' type="text" autoComplete='lastName' required className='mt-2 form-input'/>
+                            <Tooltip
+                                    title={errors.lastName ? errors.lastName.message : ''}
+                                    placement="bottom-start"
+                                    arrow
+                                    open={!!errors.lastName && watch('lastName')}
+                                >
+                                <input id='lastName'
+                                    name='lastName'
+                                    type="text"
+                                    autoComplete='lastName'
+                                    required
+                                    className='mt-2 form-input'
+                                    {...register('lastName', {
+                                        pattern: {
+                                            value: /^[A-Za-z]+$/,
+                                            message: "The name should contain letters only"
+                                        }
+                                    })}
+                                />
+                                </Tooltip>
                             </div>
                         </div>
                         <div>
                             <label htmlFor="username" className="text-left block text-sm font-medium leading-6 text-gray-900">Username</label>
+                            <div className="mt-2 relative">
+                            <Tooltip
+                                    title={errors.username ? errors.username.message : ''}
+                                    placement="bottom-start"
+                                    arrow
+                                    open={!!errors.username && watch('username')}
+                                >
+                                <input
+                                    id="username"
+                                    name="username"
+                                    type="text"
+                                    autoComplete="username"
+                                    required
+                                    className="form-input"
+                                    {...register('username', {
+                                        minLength: { value: 3, message: "Minimum length required is 3" },
+                                    })}
+                                />
+                                
+                                </Tooltip>
+                            </div>
+                        </div>
+                        <div>
+                            <label htmlFor="email" className="text-left block text-sm font-medium leading-6 text-gray-900">Email</label>
                             <div className="mt-2">
-                                <input id="username" name="username" type="text" autoComplete="username" required className="form-input" />
+                            <Tooltip
+                                    title={errors.email ? errors.email.message : ''}
+                                    placement="bottom-start"
+                                    arrow
+                                    open={!!errors.email && watch('email')}
+                                >
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    required
+                                    className="form-input"
+                                    {...register('email', {
+                                        pattern: {
+                                            value: /^(?!.*[._@-]{2,})(?=[\w\d]+[._-]?[\w\d])[\w\d._-]+[\w\d]@[\w\d._-]+\.[\w\d]+$/i,
+                                            message: "Email you entered is invalid"
+                                        }
+                                    })}
+                                />
+                                </Tooltip>
                             </div>
                         </div>
                         <div>
                             <label htmlFor="password" className="form-label">Password</label>
-                            <div className="mt-2">
-                                <input id="password" name="password" type="password" autoComplete="new-password" required className="form-input" />
+                            <div className="mt-2 relative">
+                            <Tooltip
+                                    title={errors.password ? errors.password.message : ''}
+                                    placement="bottom-start"
+                                    arrow
+                                    open={!!errors.password && watch('password')}
+                                    
+                                >
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword?"text":"password"}
+                                    autoComplete="new-password"
+                                    required
+                                    className="form-input"
+                                    {...register('password', {
+                                        minLength: { value: 8, message: "Minimul length of password should be 8" },
+                                        validate: {
+                                            hasNumber: (value) => /\d/.test(value) || "Password must contain at least one digit",
+                                            hasUppercase: (value) => /[A-Z]/.test(value) || "Password must include an uppercase letter"
+                                        }
+                                    })}
+                                />
+                                </Tooltip>
+                                <PasswordEye showPassword={showPassword} setShowPassword={setShowPassword}/>
                             </div>
                         </div>
                         <div>
-                            <label htmlFor="confirm-password" className="form-label">Confirm Password</label>
-                            <div className="mt-2">
-                                <input id="confirm-password" name="confirm-password" type="password" autoComplete="confirm-password" required className="form-input" />
+                            <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                            <div className="mt-2 relative">
+                            <Tooltip
+                                    title={errors.confirmPassword ? errors.confirmPassword.message : ''}
+                                    placement="bottom-start"
+                                    arrow
+                                    open={!!errors.confirmPassword && watch('confirmPassword')}
+                                >
+                                <input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type={showConfirmPassword?"text":"password"}
+                                    autoComplete="confirmPassword"
+                                    required
+                                    className="form-input"
+                                    {...register('confirmPassword', {
+                                        validate: (value) => value === watch('password') || 'Passwords do not match'
+
+                                    }
+                                    )}
+                                />
+                                </Tooltip>
+                                <PasswordEye showPassword={showConfirmPassword} setShowPassword={setShowConfirmPassword}/>
                             </div>
                         </div>
 
@@ -53,8 +196,8 @@ const SignUp = () => {
                         <span className="relative z-10 bg-white px-4">Or sign up with</span>
                     </span>
                     <div className='flex flex-row justify-around'>
-                        <LoginButton src={"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"} alt={"Google Logo"} text="Google"/>
-                        <LoginButton src={"https://channeli.in/branding/site/logo.svg"} alt={"Channeli Logo"} text="Channeli"/>
+                        <LoginButton src={"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"} alt={"Google Logo"} text="Google" />
+                        <LoginButton src={"https://channeli.in/branding/site/logo.svg"} alt={"Channeli Logo"} text="Channeli" />
                     </div>
 
                 </div>
@@ -64,3 +207,4 @@ const SignUp = () => {
 }
 
 export default SignUp
+
