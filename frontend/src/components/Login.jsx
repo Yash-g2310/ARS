@@ -3,6 +3,7 @@ import '../styles/loginSignupStyles.css'
 import LoginButton from './LoginButton'
 import { useForm } from 'react-hook-form'
 import PasswordEye from './PasswordEye';
+import axios from 'axios'
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false)
@@ -10,12 +11,23 @@ const Login = () => {
     const {
         register,
         handleSubmit,
+        formState:{isSubmitting}
     } = useForm({
         mode: "onChange"
     })
 
-    const onSubmit = (data) => {
+    const onSubmit = async(data) => {
         console.log(data)
+        const fetchData = async ()=>{
+            try{
+                const response = await axios.post('http://127.0.0.1:8000/login/',data);
+                console.log(response.data)
+            }
+            catch(error){
+                console.error('Error fetching data:', error);
+            }
+        }
+        fetchData()
     }
 
     return (
@@ -58,13 +70,13 @@ const Login = () => {
                                 <input
                                     id="password"
                                     name="password"
-                                    type= {showPassword?"text":"password"}
+                                    type={showPassword ? "text" : "password"}
                                     autoComplete="current-password"
                                     required
                                     className="form-input"
                                     {...register('password')}
                                 />
-                                <PasswordEye showPassword={showPassword} setShowPassword={setShowPassword}/>
+                                <PasswordEye showPassword={showPassword} setShowPassword={setShowPassword} />
                             </div>
                         </div>
 
@@ -73,7 +85,12 @@ const Login = () => {
                                 <input type="checkbox" id="remember" name="remember" className="mr-2" />
                                 <label htmlFor="remember" className="text-sm text-gray-700">Remember me</label>
                             </div>
-                            <button type="submit" className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Sign in</button>
+                            <button
+                                type="submit"
+                                className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                                disabled={isSubmitting}>
+                                {isSubmitting?"Submitting...":"Sign in"}
+                            </button>
                         </div>
                     </form>
 
