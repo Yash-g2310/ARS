@@ -11,7 +11,7 @@ const Login = () => {
     const {
         register,
         handleSubmit,
-        formState:{isSubmitting}
+        formState:{isSubmitting},
     } = useForm({
         mode: "onChange"
     })
@@ -20,7 +20,7 @@ const Login = () => {
         console.log(data)
         const fetchData = async ()=>{
             try{
-                const response = await axios.post('http://127.0.0.1:8000/login/',data);
+                const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/login/`,data);
                 console.log(response.data)
             }
             catch(error){

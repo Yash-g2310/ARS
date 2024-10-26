@@ -13,7 +13,12 @@ export default {
       xl: '1280px',  
       '2xl': '1536px',
     },
-    extend: {},
+    extend: {
+      colors:{
+        sidebarColor: "#1E1F22",
+        darkslategray: "#293b52",
+      }
+    },
   },
   plugins: [
     require('@tailwindcss/forms'),
