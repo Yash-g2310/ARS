@@ -5,9 +5,10 @@ import {
   RouterProvider,
 } from 'react-router-dom'
 
-import InfoSideBar from './components/InfoSideBar.jsx'
+import UserProfile from './components/UserProfile.jsx'
 import App from './App.jsx'
-import SpaceSideBar from './components/SpaceSideBar.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+// import SpaceSideBar from './components/SpaceSideBar.jsx'
 // import './index.css'
 
 const router = createBrowserRouter([
@@ -17,7 +18,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    element: <InfoSideBar />,
+    element: <Dashboard />,
   },
 ])
 

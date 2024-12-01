@@ -26,9 +26,15 @@ class LoginView(APIView):
         
         if user is not None:
             login(request,user)
-            return Response({'message':'Login Successful'},status = status.HTTP_200_OK)
+            return Response({
+                'message':'Login Successful',
+                'user':{
+                    'username' : user.username,
+                    'email' : user.email,
+                }
+                },status = status.HTTP_200_OK)
         else:
-            return Response({'error':'Invalide credintials'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error':'Invalide credintials'},status=status.HTTP_401_UNAUTHORIZED)
         
 class LogoutView(APIView):
     def post(self, request):
@@ -51,6 +57,7 @@ class UserProfileDetailView(generics.RetrieveUpdateAPIView):
     queryset = UserProfile.objects.all()
     # serializer_class = UserProfileSerializer
     lookup_field = 'user__username'
+    # permission_classes = [IsNotAuthenticated]
     permission_classes = [IsOwnerOrReadOnly]
     def get_serializer_class(self):
         user = self.request.user

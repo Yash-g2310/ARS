@@ -1,12 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../styles/loginSignupStyles.css'
 import LoginButton from './LoginButton'
 import { useForm } from 'react-hook-form'
 import PasswordEye from './PasswordEye';
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
+    const navigate = useNavigate()
+    const [csrfToken, setCsrfToken] = useState('')
 
     const {
         register,
@@ -16,15 +20,42 @@ const Login = () => {
         mode: "onChange"
     })
 
-    const onSubmit = async(data) => {
+    useEffect(() => {
+        const fetchCsrfToken = async () => {
+            try {
+                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/csrf/`)
+                setCsrfToken(response.data.csrfToken)
+                document.cookie = `csrftoken=${response.data.csrfToken}`
+            } catch (error) {
+                console.error('Error fetching csrf token data:', error)
+            }
+        }
+        fetchCsrfToken()
+    },[])
+
+    const onSubmit = async (data) => {
+        setErrorMessage('')
         console.log(data)
+        console.log(csrfToken)
         const fetchData = async ()=>{
             try{
-                const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/login/`,data);
+                const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/login/`,data,{
+                    withCredentials: true,
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                    },
+                });
                 console.log(response.data)
+                if (response.status===200){
+                    navigate('/dashboard')
+                    localStorage.setItem('username',response.data.user['username'])
+                }
             }
             catch(error){
                 console.error('Error fetching data:', error);
+                if(error.response.status === 400){
+                    setErrorMessage("Invalid credentials. Please try again.")
+                }
             }
         }
         fetchData()
@@ -85,6 +116,7 @@ const Login = () => {
                                 <input type="checkbox" id="remember" name="remember" className="mr-2" />
                                 <label htmlFor="remember" className="text-sm text-gray-700">Remember me</label>
                             </div>
+                            {errorMessage && <div className='bg-red-500 text-white mb-2 rounded-md'>{errorMessage}</div>}
                             <button
                                 type="submit"
                                 className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
@@ -93,7 +125,6 @@ const Login = () => {
                             </button>
                         </div>
                     </form>
-
 
                     <span className="relative flex justify-center p-6">
                         <div

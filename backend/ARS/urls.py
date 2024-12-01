@@ -19,6 +19,7 @@ from django.urls import path,include
 from django.conf.urls.static import static
 from django.conf import settings
 from spaces.views import AcceptInvite,JoinSpaceRequestView
+from .views import get_csrf_token
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -26,6 +27,7 @@ urlpatterns = [
     path('<str:username>/', include(('spaces.urls', 'spaces'), namespace='spaces')),
     path('accept-invite/<uuid:invite_token>/',AcceptInvite.as_view(),name='accept_invite'),
     path('join-space/<uuid:space_token>/',JoinSpaceRequestView.as_view(),name='join_space'),
+    path('csrf/',get_csrf_token,name='get_csrf_token'),
 ]
 
 urlpatterns+= static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

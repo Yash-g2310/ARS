@@ -9,7 +9,7 @@ const SpaceSideBar = () => {
     }
 
     return (
-        <div className='inline-flex flex-col bg-sidebarColor h-screen  text-white'>
+        <div className='inline-flex flex-col bg-backg_dark h-screen  text-white'>
             <ul className='inline-flex flex-col gap-4 pt-2'>
                 <li>
                     <div className='relative pr-2' >

@@ -15,9 +15,14 @@ export default {
     },
     extend: {
       colors:{
-        sidebarColor: "#1E1F22",
+        backg_dark: "#1E1F22",
         darkslategray: "#293b52",
-      }
+        backg_1: "#2B2D31",
+        button_purple: "#4752C4",
+      },
+      fontFamily: {
+        roboto: ['Roboto', 'sans-serif'],
+      },
     },
   },
   plugins: [
