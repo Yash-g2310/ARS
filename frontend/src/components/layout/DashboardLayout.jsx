@@ -74,7 +74,7 @@ const DashboardLayout = () => {
                             <NotActive />
                         )}
                     </div>
-                    <div className=" w-1/3 h-full overflow-y-auto">
+                    <div className=" w-1/3 min-w-[calc(200%/5)] h-full overflow-y-auto [&::-webkit-scrollbar]:hidden">
                         <NotActive />
                     </div>
                 </div>

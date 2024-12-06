@@ -1,5 +1,5 @@
 .venv/
 db.sqlite3
-*.env/
 *.pyc
 info.txt
+backend/ARS/.env

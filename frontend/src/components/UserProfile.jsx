@@ -8,7 +8,7 @@ const UserProfile = ({ userData }) => {
     };
 
     return (
-        <div className='bg-backg_1 flex flex-col p-2 w-lg max-w-lg h-full text-left overflow-auto'> 
+        <div className='bg-backg_1 flex flex-col p-2 w-lg h-full text-left overflow-auto'> 
             <h1 className='font-roboto text-2xl tracking-wide text-white opacity-80'>My Account</h1>
             <div className='bg-backg_dark rounded-md overflow-auto [&::-webkit-scrollbar]:hidden mt-2 h-full'>
                 <div className='bg-black rounded-t-md max-h-28 overflow-hidden h-full'>
