@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import Login from '../components/login'
 import SignUp from '../components/SignUp'
-import LoginSignupHeader from '../components/LoginSignupHeader'
+import LoginSignupHeader from '../components/common/LoginSignupHeader'
+
 const LoginSignup = () => {
     const [isLogin, setIsLogin] = useState(true)
     return (

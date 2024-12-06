@@ -1,30 +1,17 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { 
-  createBrowserRouter, 
-  RouterProvider,
-} from 'react-router-dom'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import routes from "./routes/RouteConfig";
+import { AuthProvider } from "./context/AuthContext";
 
-import UserProfile from './components/UserProfile.jsx'
-import App from './App.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-// import SpaceSideBar from './components/SpaceSideBar.jsx'
-// import './index.css'
+const root = document.getElementById("root");
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <App />,
-  },
-  {
-    path: '/dashboard',
-    element: <Dashboard />,
-  },
-])
+const router = createBrowserRouter(routes);
 
-createRoot(document.getElementById('root')).render(
+createRoot(root).render(
   <StrictMode>
-    <RouterProvider router={router}/>
-    {/* <App /> */}
-  </StrictMode>,
-)
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  </StrictMode>
+);

@@ -2,7 +2,7 @@ from rest_framework import generics,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Assignment,AssignmentReviewee,AssignmentReviewer,AssignmentTeam,TeamMember
-from .serializers import AssignmentCreateSerializer,AssignmentListSerializer,AssignmentRetrieveUpdateSerializer,AssignmentMemberSerializer
+from .serializers import AssignmentCreateSerializer,AssignmentListSerializer,AssignmentRetrieveUpdateSerializer,AssignmentMemberSerializer,UserAssignmentRevieweeSerializer
 from .permissions import IsSubSpaceReviewerOrMemberElseForbidden,IsVisibleOrMemberElseForbidden
 from django.utils import timezone
 from django.db.models import Q
@@ -92,3 +92,23 @@ class AssignmentMembersView(generics.RetrieveAPIView):
     def get_object(self):
         assignment_id = self.kwargs.get('assignment_id')
         return generics.get_object_or_404(self.get_queryset(), id=assignment_id)
+    
+class UserAssignmentsRevieweeView(generics.ListAPIView):
+    serializer_class = UserAssignmentRevieweeSerializer
+    permissions = [IsSubSpaceReviewerOrMemberElseForbidden, IsVisibleOrMemberElseForbidden]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        subspace_members = SubSpaceMember.objects.filter(
+            space_member__user=user
+        )
+
+        assignments = AssignmentReviewee.objects.filter(
+            reviewee__in = subspace_members
+        ).distinct().select_related(
+            'assignment',
+            'reviewee',
+        )
+
+        return assignments

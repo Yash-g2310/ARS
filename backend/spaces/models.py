@@ -84,7 +84,7 @@ class SubSpace(models.Model):
     create_date = models.DateField(auto_now_add=True)
     
     def __str__(self) :
-        return self.sub_space_name
+        return f"{self.sub_space_name} -> {self.space.space_name}"
     
     @property
     def reviewer_count(self):

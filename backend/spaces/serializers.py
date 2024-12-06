@@ -277,3 +277,18 @@ class SubSpaceDetailUpdateSerializer(SubSpaceCreateSerializer):
         
         return instance
     
+class SpaceMinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Space
+        fields = ['id','space_name']
+
+class SubSpaceMinSerializer(serializers.ModelSerializer):
+    space = SpaceMinSerializer()
+    role = serializers.SerializerMethodField()
+    class Meta:
+        model = SubSpace
+        fields = ['id','sub_space_name', 'space', 'role']
+    
+    def get_role(self,obj):
+        a = SubSpaceMember.objects.get(sub_space = obj,space_member__user = self.context['request'].user)
+        return a.role

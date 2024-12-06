@@ -183,3 +183,42 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
         assignment_submission_id = self.context.get('submission_id')
         attachments = Attachment.objects.filter(assignment_submission = assignment_submission_id)
         return AttachmentSerializer(attachments,many =True).data
+    
+    
+class UserAssignmentReviewerSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+    sub_space_name = serializers.SerializerMethodField()
+    space_name = serializers.SerializerMethodField()
+    reviewee_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = AssignmentSubmission
+        fields = [
+            'id',
+            'title',
+            'sub_space_name',
+            'space_name',
+            'reviewee_name',
+            'status',
+        ]
+        
+    def get_title(self,obj):
+        ret =''
+        if (obj.assignment_reviewee): ret = obj.assignment_reviewee.assignment.title
+        else: ret = obj.assignment_team.assignment.title
+        return ret
+    def get_sub_space_name(self,obj):
+        ret =''
+        if (obj.assignment_reviewee): ret = obj.assignment_reviewee.assignment.sub_space.sub_space_name
+        else: ret = obj.assignment_team.assignment.sub_space.sub_space_name
+        return ret
+    def get_space_name(self,obj):
+        ret =''
+        if (obj.assignment_reviewee): ret = obj.assignment_reviewee.assignment.sub_space.space.space_name
+        else: ret = obj.assignment_team.assignment.sub_space.space.space_name
+        return ret
+    def get_reviewee_name(self,obj):
+        ret =''
+        if (obj.assignment_reviewee): ret = obj.assignment_reviewee.reviewee.space_member.user.username
+        else: ret = obj.assignment_team.team_name
+        return ret

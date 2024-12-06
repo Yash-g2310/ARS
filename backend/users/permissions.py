@@ -12,7 +12,10 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 class IsOwnerOrForbidden(permissions.BasePermission):
     
     def has_permission(self, request, view):
+        # print(request.user.is_authenticated)
         username =view.kwargs.get('username',None)
+        # print(view.kwargs)
+        # print(username)
         if username is None:
             return super().has_permission(request,view)
         else:

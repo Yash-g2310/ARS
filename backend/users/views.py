@@ -12,7 +12,8 @@ from .serializers import UserSerializer, UserProfileSerializer,RestrictedUserPro
 from .models import UserProfile
 from .permissions import IsOwnerOrReadOnly,IsNotAuthenticated,IsOwnerOrForbidden
 from .utility import getUserInfo
-from constants.constants import AUTH_URL,CLIENT_ID,REDIRECT_URI,CLIENT_SECRET,AUTH_POST_URL,USER_DATA_URL
+from constants.constants import AUTH_URL,CLIENT_ID,REDIRECT_URI,CLIENT_SECRET,AUTH_POST_URL,USER_DATA_URL,FRONTEND_BASE_URL
+from urllib.parse import urlencode
 # Create your views here.
 
 class LoginView(APIView):
@@ -61,7 +62,7 @@ class UserProfileDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
     def get_serializer_class(self):
         user = self.request.user
-        if self.request.user == self.get_object().user:
+        if user == self.get_object().user:
             return UserProfileSerializer
         return RestrictedUserProfileSerializer
     
@@ -72,9 +73,14 @@ class UserProfileDetailView(generics.RetrieveUpdateAPIView):
 class ChanneliTokenView(APIView):
     permission_classes = [IsNotAuthenticated]
     def get(self, request,*args, **kwargs):
-        REDIRECT_URL = f"{AUTH_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
-        return redirect(REDIRECT_URL)
-    
+        # REDIRECT_URL = f"{AUTH_URL}?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}"
+        # return redirect(REDIRECT_URL)
+        auth_data = {
+            'client_id': CLIENT_ID,
+            'redirect_uri': REDIRECT_URI,
+            'auth_url': AUTH_URL,
+        }
+        return Response(auth_data,status=status.HTTP_200_OK)
 
 class ChanneliTokenRecall(APIView):
     permission_classes = [IsNotAuthenticated]
@@ -121,11 +127,14 @@ class ChanneliTokenRecall(APIView):
             return Response({"error":"user_profile don't exist but user do"})
         try:
             login(request,user)
-            # return Response({"detail":"logged in successfully"},status=status.HTTP_200_OK)
+            queryparms = urlencode({
+                'username':user.username,
+                'status':'success'
+            })
             
-            return redirect(f"http://localhost:8000/{user.username}/profile/")
+            return redirect(f"{FRONTEND_BASE_URL}/auth/callback?{queryparms}")
         except:
-            return Response({'error':'unable to log you in'},status=status.HTTP_400_BAD_REQUEST)
+            return redirect(f"{FRONTEND_BASE_URL}/?error=auth_failed")
         
 
 class ChangePasswordView(APIView):

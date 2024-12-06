@@ -3,14 +3,18 @@ import '../styles/loginSignupStyles.css'
 import LoginButton from './LoginButton'
 import { useForm } from 'react-hook-form'
 import PasswordEye from './PasswordEye';
-import axios from 'axios'
+import axiosInstance from '../utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import { useContext } from 'react';
+import { channeliLogin } from '../services/loginapi';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
     const navigate = useNavigate()
     const [csrfToken, setCsrfToken] = useState('')
+    const { isAuthenticated,login,setIsAuthenticated } = useContext(AuthContext);
 
     const {
         register,
@@ -23,42 +27,43 @@ const Login = () => {
     useEffect(() => {
         const fetchCsrfToken = async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/csrf/`)
-                setCsrfToken(response.data.csrfToken)
-                document.cookie = `csrftoken=${response.data.csrfToken}`
+                const response = await axiosInstance.get('/csrf/');
+                if(response.data.csrfToken){
+                    setCsrfToken(response.data.csrfToken);
+                }
             } catch (error) {
-                console.error('Error fetching csrf token data:', error)
+                console.error('Error fetching csrf token data:', error);
             }
+        };
+        fetchCsrfToken();
+    }, []);
+
+    useEffect(() => {
+        if(isAuthenticated){
+            navigate('/dashboard');
         }
-        fetchCsrfToken()
-    },[])
+    }, [navigate,isAuthenticated]);
+
 
     const onSubmit = async (data) => {
         setErrorMessage('')
-        console.log(data)
-        console.log(csrfToken)
-        const fetchData = async ()=>{
+        const userLogIn = async ()=>{
             try{
-                const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/login/`,data,{
-                    withCredentials: true,
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                    },
-                });
-                console.log(response.data)
+                const response = await axiosInstance.post('/login/')
                 if (response.status===200){
-                    navigate('/dashboard')
                     localStorage.setItem('username',response.data.user['username'])
+                    await setIsAuthenticated(true);
+                    login();
                 }
             }
             catch(error){
                 console.error('Error fetching data:', error);
-                if(error.response.status === 400){
+                if(error.response && error.response.status === 400){
                     setErrorMessage("Invalid credentials. Please try again.")
                 }
             }
         }
-        fetchData()
+        userLogIn()
     }
 
     return (
@@ -134,8 +139,8 @@ const Login = () => {
                         <span className="relative z-10 bg-white px-4">Or continue with</span>
                     </span>
                     <div className='flex flex-row justify-around'>
-                        <LoginButton src={"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"} alt={"Google Logo"} text="Google" />
-                        <LoginButton src={"https://channeli.in/branding/site/logo.svg"} alt={"Channeli Logo"} text="Channeli" />
+                        <LoginButton src={"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"} alt={"Google Logo"} text="Google" onClick={()=>{}}/>
+                        <LoginButton src={"https://channeli.in/branding/site/logo.svg"} alt={"Channeli Logo"} text="Channeli" onClick={channeliLogin}/>
                     </div>
                 </div>
             </div>

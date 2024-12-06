@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics,status
 from rest_framework.response import Response
-from submissions.serializers.serializers import AssignmentStatusSerializer,AssignmentSubmitSerializer,SubmissionListSerializer,SubmissionDetailSerializer
+from submissions.serializers.serializers import AssignmentStatusSerializer,AssignmentSubmitSerializer,SubmissionListSerializer,SubmissionDetailSerializer,UserAssignmentReviewerSerializer
 from submissions.serializers.review_serializers import StartReviewSerializer,EndReviewSubmissionSerializer
 from django.shortcuts import get_object_or_404
 from assignments.models import Assignment,AssignmentReviewer,AssignmentReviewee,AssignmentTeam
@@ -132,3 +132,23 @@ class EndReviewSubmissionView(generics.UpdateAPIView):
         lookup_val = self.kwargs[self.lookup_field]
         return get_object_or_404(self.get_queryset(),id = lookup_val)
     
+class UserAssignmentsReviewerView(generics.ListAPIView):
+    serializer_class = UserAssignmentReviewerSerializer
+    permissions = [IsAssignmentRevieweeTeamOrReviewerElseForbidden]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        subspace_members = AssignmentReviewer.objects.filter(
+            reviewer__space_member__user=user
+        )
+        print(subspace_members)
+        assignments = AssignmentSubmission.objects.filter(
+            assignment_reviewer__in = subspace_members
+        ).distinct().select_related(
+            # 'assignment_reviewee', 
+            # 'assignment_team', 
+            # 'assignment_reviewer',
+        )
+
+        return assignments

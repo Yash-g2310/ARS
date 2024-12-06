@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from .models import Assignment,AssignmentDetails,AssignmentSubtask,AssignmentReviewer,AssignmentReviewee,AssignmentTeam,TeamMember
 from spaces.models import SubSpaceMember,SubSpace
-from spaces.serializers import SubSpaceMemberSerializer
+from spaces.serializers import SubSpaceMemberSerializer,SubSpaceMinSerializer
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from attachments.serializers import AttachmentSerializer
 from attachments.models import Attachment
+
 
 
 # while updating assignment, we need to pass the id with the attributes which need to be updated.
@@ -369,8 +370,8 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
         return AssignmentTeamSerializer(teams,many =True).data
     
     def get_attachment_list(self,obj):
-        teams = obj.attachment_set.all()
-        return AttachmentSerializer(teams,many =True).data
+        attachments = obj.attachments.all()
+        return AttachmentSerializer(attachments,many =True).data
     
     def update(self, instance, validated_data):
         uploader = validated_data.get('uploader',None)
@@ -508,3 +509,30 @@ class AssignmentMemberSerializer(serializers.ModelSerializer):
     def get_assignment_teams(self,obj):
         teams = obj.assignmentteam_set.all()
         return AssignmentTeamSerializer(teams,many =True).data
+    
+class UserAssignmentRevieweeSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+    # sub_space = SubSpaceMinSerializer()
+    sub_space_name = serializers.SerializerMethodField()
+    space_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = AssignmentReviewee
+        fields = [
+            'id',
+            'title',
+            'sub_space_name',
+            'space_name',
+            # 'sub_space',
+            'reviewee_status',
+        ]
+        
+    def get_title(self,obj):
+        return obj.assignment.title
+    def get_sub_space_name(self,obj):
+        return obj.assignment.sub_space.sub_space_name
+    def get_space_name(self,obj):
+        return obj.assignment.sub_space.space.space_name
+    
+
+        

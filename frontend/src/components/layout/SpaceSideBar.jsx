@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
 
-const SpaceSideBar = () => {
+const SpaceSideBar = (compoentState, setComponentState) => {
     const dummyData = ['https://robohash.org/10.37.201.177.png', 'https://robohash.org/1037.201.177.png', 'https://robohash.org/103.201.177.png', 'https://robohash.org/103.37.201.png']
     const [hoverIndex, setHoverIndex] = useState(null)
-    const [clickIndex, setClickIndex] = useState(null)
+    const [clickIndex, setClickIndex] = useState(Infinity)
     const handleClick = (i) => {
         setClickIndex(i)
     }
 
     return (
-        <div className='inline-flex flex-col bg-backg_dark h-screen  text-white'>
+        <div className='inline-flex flex-col bg-backg_dark h-screen text-white overflow-auto [&::-webkit-scrollbar]:hidden'>
             <ul className='inline-flex flex-col gap-4 pt-2'>
                 <li>
                     <div className='relative pr-2' >

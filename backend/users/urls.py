@@ -1,6 +1,8 @@
 from django.urls import path,include
 from django.conf.urls.static import static
 from . import views
+from assignments.views import UserAssignmentsRevieweeView
+from submissions.views import UserAssignmentsReviewerView
 
 urlpatterns = [
     path('auth/channeli/',views.ChanneliTokenView.as_view(),name='channeli_login'),
@@ -12,4 +14,6 @@ urlpatterns = [
     path('<str:username>/profile/change-password/',views.ChangePasswordView.as_view(),name='change_pass'),
     path('<str:username>/profile/change-username/',views.ChangeUsernameView.as_view(),name='change_username'),
     path('<str:username>/delete/',views.UserDeleteView.as_view(),name='user_delete'),
+    path('<str:username>/assignments/reviewee',UserAssignmentsRevieweeView.as_view(),name='user_assignments_reviewee'),
+    path('<str:username>/assignments/reviewer',UserAssignmentsReviewerView.as_view(),name='user_assignments_reviewer'),
 ]
