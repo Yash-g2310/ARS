@@ -1,54 +1,48 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import axiosInstance from '../utils/axiosInstance';
+import { fetchUserData } from '../services/api';
 
-const AuthContext = createContext();
+const UserContext = createContext(null);
 
-const AuthProvider = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+const UserProvider = ({ children }) => {
+    const [userProfileData, setUserProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const checkAuth = async () => {
-        try{
-            const response = await axiosInstance.get('/session/');
-            if (response.data.session) {
-                setIsAuthenticated(true);
-            }
+    const getUserData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const data = await fetchUserData();
+            setUserProfileData(data);
         } catch (err) {
             setError(err.message);
-            setIsAuthenticated(false);
-        } finally{
+        } finally {
             setLoading(false);
         }
-    }
+    }, []);
 
     useEffect(() => {
-        checkAuth();
+        getUserData();
     }, []);
-
-    const login = useCallback(() => {
-        setIsAuthenticated(true);
-    }, []);
-
-    const logout = useCallback(() => {
-        setIsAuthenticated(false);
-        localStorage.removeItem('username');
-    }, []);
-
-    if (loading) return <div>Loading auth state...</div>;
-    if (error) return <div>Authentication Error: {error}</div>;
 
     return (
-        <AuthContext.Provider value={{ 
-            isAuthenticated, 
-            setIsAuthenticated, 
-            login, 
-            logout,
-            loading
+        <UserContext.Provider value={{ 
+            userProfileData,
+            loading,
+            error,
+            getUserData,
+            setUserProfileData
         }}>
             {children}
-        </AuthContext.Provider>
+        </UserContext.Provider>
     );
 };
 
-export { AuthProvider, AuthContext };
+const useUser = () => {
+    const context = React.useContext(UserContext);
+    if (!context) {
+        throw new Error('useUser must be used within UserProvider');
+    }
+    return context;
+};
+
+export { UserProvider, useUser };

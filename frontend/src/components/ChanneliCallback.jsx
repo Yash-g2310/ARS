@@ -13,22 +13,14 @@ const ChanneliCallback = () => {
         const status = params.get('status')
         if(status=='success' && username){
             localStorage.setItem('username',username)
-            // console.log("in callback------------------")
-            // console.log(isAuthenticated)
             setIsAuthenticated(true);
-            // console.log(isAuthenticated)
             login();
-            // console.log(isAuthenticated)
-            // console.log("exit callback------------------")
-            // navigate('/dashboard')
         } else{
             navigate('/');
         }
     }, [])
     useEffect(() => {
         if(isAuthenticated) {
-            // console.log("in callback------------------")
-            // console.log('Auth state updated:', isAuthenticated);
             navigate('/dashboard');
         }
     }, [isAuthenticated])

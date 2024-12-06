@@ -10,7 +10,7 @@ const AuthProvider = ({ children }) => {
 
     const checkAuth = async () => {
         try{
-            const response = await axiosInstance.get('/session/');
+            const response = await axiosInstance.get('/session/')
             if (response.data.session) {
                 setIsAuthenticated(true);
             }
