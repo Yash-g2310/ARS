@@ -15,11 +15,11 @@ const SideDrawer = ({userData, toggleComponentState}) => {
                 </div>
                 <div className='absolute top-full left-2'>
                     <div className='flex flex-row items-center gap-3'>
-                        <div className='w-16 h-16'>
+                        <div className='w-16 h-16 '>
                             <img
                                 src={userData?.profile_image} 
                                 alt=""
-                                className='w-full h-fit rounded-full border-4 border-backg_mid_dark bg-backg_dark transition-all duration-200 hover:border-gray-600 shadow-lg'
+                                className='w-full h-full rounded-full border-4 border-backg_mid_dark bg-backg_dark transition-all duration-200 hover:border-gray-600 shadow-lg '
                             />
                         </div>
                         <h2 className='text-white font-roboto'>{userData?.username}</h2>

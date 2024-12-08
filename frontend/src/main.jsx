@@ -2,8 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import routes from "./routes/RouteConfig";
-import { AuthProvider } from "./context/AuthContext";
-import { UserProvider } from "./context/UserContext";
+import { store } from './app/store'
+import { Provider } from 'react-redux'
 
 const root = document.getElementById("root");
 
@@ -11,10 +11,8 @@ const router = createBrowserRouter(routes);
 
 createRoot(root).render(
   <StrictMode>
-    <AuthProvider>
-      <UserProvider>
-        <RouterProvider router={router} />
-      </UserProvider>
-    </AuthProvider>
+        <Provider store={store}>
+          <RouterProvider router={router} />
+        </Provider>
   </StrictMode>
 );

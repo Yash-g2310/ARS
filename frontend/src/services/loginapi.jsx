@@ -1,12 +1,8 @@
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from '../context/AuthContext';
-import { useContext } from 'react';
-import { responsiveFontSizes } from "@mui/material";
 
 
 export const channeliLogin = async (data) => {
-    
+
     try {
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/auth/channeli/`, {
             withCredentials: true,

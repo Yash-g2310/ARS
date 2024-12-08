@@ -23,7 +23,6 @@ const DashboardLayout = () => {
 
     useEffect(() => {
         let mounted = true;
-
         const getData = async () => {
             try {
                 const response = await fetchUserData();

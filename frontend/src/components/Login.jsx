@@ -1,69 +1,43 @@
-import { useEffect, useState } from 'react'
+import {useState } from 'react'
 import '../styles/loginSignupStyles.css'
 import LoginButton from './LoginButton'
 import { useForm } from 'react-hook-form'
 import PasswordEye from './PasswordEye';
-import axiosInstance from '../utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import { useContext } from 'react';
-import { channeliLogin } from '../services/loginapi';
+// import { channeliLogin } from '../services/loginapi';
+import { useDispatch, useSelector } from 'react-redux';
+import { login, clearLoginError, channeliLogin, fetchUserProfile } from '../features/auth/authSlice';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false)
-    const [errorMessage, setErrorMessage] = useState('')
     const navigate = useNavigate()
-    const [csrfToken, setCsrfToken] = useState('')
-    const { isAuthenticated,login,setIsAuthenticated } = useContext(AuthContext);
+    const dispatch = useDispatch();
+    const auth = useSelector(state => state.auth);
+
 
     const {
         register,
         handleSubmit,
-        formState:{isSubmitting},
+        formState: { isSubmitting },
     } = useForm({
         mode: "onChange"
     })
 
-    useEffect(() => {
-        const fetchCsrfToken = async () => {
-            try {
-                const response = await axiosInstance.get('/csrf/');
-                if(response.data.csrfToken){
-                    setCsrfToken(response.data.csrfToken);
-                }
-            } catch (error) {
-                console.error('Error fetching csrf token data:', error);
-            }
-        };
-        fetchCsrfToken();
-    }, []);
-
-    useEffect(() => {
-        if(isAuthenticated){
-            navigate('/dashboard');
-        }
-    }, [navigate,isAuthenticated]);
-
 
     const onSubmit = async (data) => {
-        setErrorMessage('')
-        const userLogIn = async ()=>{
-            try{
-                const response = await axiosInstance.post('/login/')
-                if (response.status===200){
-                    localStorage.setItem('username',response.data.user['username'])
-                    await setIsAuthenticated(true);
-                    login();
-                }
+        dispatch(clearLoginError());
+        try {
+            await dispatch(login(data)).unwrap();
+            if (auth.isAuthenticated) {
+                await dispatch(fetchUserProfile()).unwrap();
+                    if(auth.user !== null){
+                        dispatch(clearLoginError());
+                        navigate('/dashboard');
+                    }
             }
-            catch(error){
-                console.error('Error fetching data:', error);
-                if(error.response && error.response.status === 400){
-                    setErrorMessage("Invalid credentials. Please try again.")
-                }
-            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
         }
-        userLogIn()
     }
 
     return (
@@ -121,12 +95,12 @@ const Login = () => {
                                 <input type="checkbox" id="remember" name="remember" className="mr-2" />
                                 <label htmlFor="remember" className="text-sm text-gray-700">Remember me</label>
                             </div>
-                            {errorMessage && <div className='bg-red-500 text-white mb-2 rounded-md'>{errorMessage}</div>}
+                            {auth.isError && <div className='bg-red-500 text-white mb-2 pl-2 rounded-md'>{auth.errorMessage}</div>}
                             <button
                                 type="submit"
                                 className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                                 disabled={isSubmitting}>
-                                {isSubmitting?"Submitting...":"Sign in"}
+                                {isSubmitting ? "Submitting..." : "Sign in"}
                             </button>
                         </div>
                     </form>
@@ -139,8 +113,8 @@ const Login = () => {
                         <span className="relative z-10 bg-white px-4">Or continue with</span>
                     </span>
                     <div className='flex flex-row justify-around'>
-                        <LoginButton src={"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"} alt={"Google Logo"} text="Google" onClick={()=>{}}/>
-                        <LoginButton src={"https://channeli.in/branding/site/logo.svg"} alt={"Channeli Logo"} text="Channeli" onClick={channeliLogin}/>
+                        <LoginButton src={"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"} alt={"Google Logo"} text="Google" onClick={() => { }} />
+                        <LoginButton src={"https://channeli.in/branding/site/logo.svg"} alt={"Channeli Logo"} text="Channeli" onClick={async()=>{await dispatch(channeliLogin()).unwrap()}} />
                     </div>
                 </div>
             </div>

@@ -4,7 +4,7 @@ export const fetchUserData = async () => {
     const username = localStorage.getItem('username');
 
     try{
-        const response = await axiosInstance.get(`/${username}/profile/`);
+        const response = await axiosInstance.get(`/auth/${username}/profile/`);
         if(response.status === 200){
             return response.data;
         }

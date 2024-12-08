@@ -23,12 +23,14 @@ from .views import GetCsrfToken,SessionCheckView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('csrf/',GetCsrfToken.as_view(),name='get_csrf_token'),
-    path('session/',SessionCheckView.as_view(),name='check_session'),
-    path('accept-invite/<uuid:invite_token>/',AcceptInvite.as_view(),name='accept_invite'),
-    path('join-space/<uuid:space_token>/',JoinSpaceRequestView.as_view(),name='join_space'),
-    path('',include('users.urls')),
-    path('<str:username>/', include(('spaces.urls', 'spaces'), namespace='spaces')),
+    path('api/',include([
+        path('csrf/',GetCsrfToken.as_view(),name='get_csrf_token'),
+        path('session/',SessionCheckView.as_view(),name='check_session'),
+        path('accept-invite/<uuid:invite_token>/',AcceptInvite.as_view(),name='accept_invite'),
+        path('join-space/<uuid:space_token>/',JoinSpaceRequestView.as_view(),name='join_space'),
+        path('auth/',include('users.urls')),
+        path('<str:username>/', include(('spaces.urls', 'spaces'), namespace='spaces')),
+    ])),
 ]
 
 urlpatterns+= static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

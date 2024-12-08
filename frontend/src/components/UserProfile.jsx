@@ -16,8 +16,8 @@ const UserProfile = ({ userData }) => {
                 </div>
                 <div className='flex flex-row justify-between px-8 items-center my-4 '>
                     <div className='flex flex-row items-center gap-3'>
-                        <div className='w-12 h-12'>
-                            <img src={`${userData.profile_image}`} alt="profile-image" className='w-full h-fit rounded-full' />
+                        <div className='w-16 h-16'>
+                            <img src={`${userData.profile_image}`} alt="profile-image" className='w-full h-full rounded-full' />
                         </div>
                         <h2 className='text-white font-roboto '>user123</h2>
                     </div>

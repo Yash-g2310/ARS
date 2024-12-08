@@ -5,8 +5,8 @@ from assignments.views import UserAssignmentsRevieweeView
 from submissions.views import UserAssignmentsReviewerView
 
 urlpatterns = [
-    path('auth/channeli/',views.ChanneliTokenView.as_view(),name='channeli_login'),
-    path('auth/channeli/callback/',views.ChanneliTokenRecall.as_view(),name='channeli_callback'),
+    path('channeli/',views.ChanneliTokenView.as_view(),name='channeli_login'),
+    path('channeli/callback/',views.ChanneliTokenRecall.as_view(),name='channeli_callback'),
     path('register/',views.UserRegistrationView.as_view(),name='user_register'),
     path('login/',views.LoginView.as_view(),name="log_in"),
     path('logout/',views.LogoutView.as_view(),name="log_out"),

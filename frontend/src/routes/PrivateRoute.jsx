@@ -1,11 +1,24 @@
-import React,{useContext} from "react";
+import React,{useEffect} from "react";
 import { Navigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { useSelector, useDispatch} from "react-redux";
+import { checkSession } from "../features/auth/authSlice";
 
 const PrivateRoute = ({ children }) => {
-    const { isAuthenticated } = useContext(AuthContext);
+    const dispatch = useDispatch();
+    const { isAuthenticated,isLoading } = useSelector(state=>state.auth)
 
-    console.log(isAuthenticated);
+    useEffect(() => {
+        const verifySession = async () => {
+            try{
+                await dispatch(checkSession()).unwrap();
+            } catch (error){
+                console.error('Error checking session:', error);
+            }
+        }
+        verifySession();
+    },[dispatch])
+
+    if(isLoading) return <div>Loading auth state...</div>;
     return isAuthenticated ? children : <Navigate to="/" />;
 }
 
