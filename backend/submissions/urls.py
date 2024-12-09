@@ -11,6 +11,6 @@ urlpatterns = [
     path('solo/<int:assignment_reviewee_id>/',views.AssignmentSubmissionListView.as_view(),name = 'reviewee_submission_list'),
     path('team/<int:assignment_team_id>/',views.AssignmentSubmissionListView.as_view(),name = 'team_submission_list'),
     path('<int:submission_id>/details/',views.SubmissionDetailView.as_view(),name = 'submission_detail'),
-    path('<int:submission_id>/start-review',views.StartReviewView.as_view(),name = 'start_review'),
-    path('<int:submission_id>/end-review',views.EndReviewSubmissionView.as_view(),name = 'end-review'),
+    path('<int:submission_id>/start-review/',views.StartReviewView.as_view(),name = 'start_review'),
+    path('<int:submission_id>/end-review/',views.EndReviewSubmissionView.as_view(),name = 'end-review'),
 ]

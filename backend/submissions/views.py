@@ -142,7 +142,6 @@ class UserAssignmentsReviewerView(generics.ListAPIView):
         subspace_members = AssignmentReviewer.objects.filter(
             reviewer__space_member__user=user
         )
-        print(subspace_members)
         assignments = AssignmentSubmission.objects.filter(
             assignment_reviewer__in = subspace_members
         ).distinct().select_related(

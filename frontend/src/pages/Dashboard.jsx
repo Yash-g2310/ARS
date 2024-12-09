@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SpaceSideBar from '../components/layout/SpaceSideBar'
-import UserProfile from '../components/UserProfile'
+import UserProfile from '../components/dashboard/UserProfile'
 import NotActive from '../components/common/NotActive'
 import SideDrawer from '../components/layout/SideDrawer'
 import axios from 'axios'

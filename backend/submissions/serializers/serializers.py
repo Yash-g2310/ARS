@@ -204,18 +204,15 @@ class UserAssignmentReviewerSerializer(serializers.ModelSerializer):
         
     def get_title(self,obj):
         ret =''
-        if (obj.assignment_reviewee): ret = obj.assignment_reviewee.assignment.title
-        else: ret = obj.assignment_team.assignment.title
+        ret = obj.assignment_reviewer.assignment.title
         return ret
     def get_sub_space_name(self,obj):
         ret =''
-        if (obj.assignment_reviewee): ret = obj.assignment_reviewee.assignment.sub_space.sub_space_name
-        else: ret = obj.assignment_team.assignment.sub_space.sub_space_name
+        ret = obj.assignment_reviewer.assignment.sub_space.sub_space_name
         return ret
     def get_space_name(self,obj):
         ret =''
-        if (obj.assignment_reviewee): ret = obj.assignment_reviewee.assignment.sub_space.space.space_name
-        else: ret = obj.assignment_team.assignment.sub_space.space.space_name
+        ret = obj.assignment_reviewer.assignment.sub_space.space.space_name
         return ret
     def get_reviewee_name(self,obj):
         ret =''

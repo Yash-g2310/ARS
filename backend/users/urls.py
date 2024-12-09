@@ -14,6 +14,6 @@ urlpatterns = [
     path('<str:username>/profile/change-password/',views.ChangePasswordView.as_view(),name='change_pass'),
     path('<str:username>/profile/change-username/',views.ChangeUsernameView.as_view(),name='change_username'),
     path('<str:username>/delete/',views.UserDeleteView.as_view(),name='user_delete'),
-    path('<str:username>/assignments/reviewee',UserAssignmentsRevieweeView.as_view(),name='user_assignments_reviewee'),
-    path('<str:username>/assignments/reviewer',UserAssignmentsReviewerView.as_view(),name='user_assignments_reviewer'),
+    path('<str:username>/assignments/reviewee/',UserAssignmentsRevieweeView.as_view(),name='user_assignments_reviewee'),
+    path('<str:username>/assignments/reviewer/',UserAssignmentsReviewerView.as_view(),name='user_assignments_reviewer'),
 ]

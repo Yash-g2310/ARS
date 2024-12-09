@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import Login from '../components/login'
-import SignUp from '../components/SignUp'
+import Login from '../components/loginSignUp/Login'
+import SignUp from '../components/loginSignUp/SignUp'
 import LoginSignupHeader from '../components/common/LoginSignupHeader'
 
 const LoginSignup = () => {

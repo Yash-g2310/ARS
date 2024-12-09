@@ -8,6 +8,8 @@ const PrivateRoute = ({ children }) => {
     const { isAuthenticated,isLoading } = useSelector(state=>state.auth)
 
     useEffect(() => {
+        console.log('checking session in private route');
+        console.log(isAuthenticated);
         const verifySession = async () => {
             try{
                 await dispatch(checkSession()).unwrap();
@@ -16,6 +18,7 @@ const PrivateRoute = ({ children }) => {
             }
         }
         verifySession();
+        console.log('session checked');
     },[dispatch])
 
     if(isLoading) return <div>Loading auth state...</div>;

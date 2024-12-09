@@ -46,8 +46,16 @@ export const channeliLogin = createAsyncThunk('auth/channeliLogin', async (_, re
 export const fetchUserProfile = createAsyncThunk('auth/fetchUserProfile', async (_,{rejectWithValue})=>{
     try{
         const username = localStorage.getItem('username');
-        const response = await authAPI.getProfile(username);
-        return response.data;
+        const responseProfile = await authAPI.getProfile(username);
+        const responseRevieweeAssignments = await authAPI.getRevieweeAssignments(username);
+        const responseReviewerAssignments = await authAPI.getReviewerAssignments(username);
+        const response = {
+            profile: responseProfile.data,
+            revieweeAssignments: responseRevieweeAssignments.data,
+            reviewerAssignments: responseReviewerAssignments.data,
+        }
+        console.log(response);
+        return response;
     } catch (error){
         return rejectWithValue(error.response.data);
     }
@@ -56,13 +64,15 @@ export const fetchUserProfile = createAsyncThunk('auth/fetchUserProfile', async 
 const initialState = {
     isAuthenticated: false,
     user: null,
+    revieweeAssignments: [],
+    reviewerAssignments: [],
+    
     isLoading: false,
     loading: {
         login: false,
         register: false,
         session: false,
     },
-
     isError: false,
     errorMessage: '',
     error: {
@@ -149,7 +159,9 @@ const authSlice = createSlice({
             .addCase(fetchUserProfile.fulfilled, (state, action)=>{
                 console.log(action.payload);
                 state.isLoading = false;
-                state.user = action.payload;
+                state.user = action.payload.profile;
+                state.revieweeAssignments = action.payload.revieweeAssignments;
+                state.reviewerAssignments = action.payload.reviewerAssignments;
             })
             .addCase(fetchUserProfile.rejected, (state, action)=>{
                 state.isLoading = false;

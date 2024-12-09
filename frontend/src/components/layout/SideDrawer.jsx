@@ -1,9 +1,8 @@
 import React from 'react'
-import { use } from 'react';
 
 const SideDrawer = ({userData, toggleComponentState}) => {
-    console.log(toggleComponentState)
-    console.log(userData)
+    // console.log(toggleComponentState)
+    // console.log(userData)
     if (!userData) {
         return <div>Loading user data...</div>;
     }

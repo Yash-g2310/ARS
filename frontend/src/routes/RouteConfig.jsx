@@ -1,28 +1,28 @@
 import MainLayout from "../components/layout/MainLayout";
-import UserProfile from "../components/UserProfile";
+import UserProfile from "../components/dashboard/UserProfile";
 import LoginSignup from "../pages/LoginSignup";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import NotActive from "../components/common/NotActive";
 import PublicRoute from "./PublicRoute";
 import PrivateRoute from "./PrivateRoute";
-import ChanneliCallback from "../components/ChanneliCallback";
+import ChanneliCallback from "../components/loginSignUp/ChanneliCallback";
 
 const routes = [
     {
         path: '/',
         element: (
-            <PublicRoute>
+            // <PublicRoute>
                 <LoginSignup />
-            </PublicRoute>
+            // </PublicRoute>
         ),
     },
     {
         path: "/auth/callback",
 
         element: (
-            <PublicRoute>
+            // <PublicRoute>
                 <ChanneliCallback />
-            </PublicRoute>
+            // </PublicRoute>
         )
     },
     {

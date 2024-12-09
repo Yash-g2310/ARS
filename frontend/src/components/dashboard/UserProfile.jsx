@@ -50,7 +50,7 @@ const UserProfile = ({ userData }) => {
                     <div className='flex justify-between items-start'>
                         <div className='my-2'>
                             <h3 className='text-light_gray text-left'>PHONE</h3>
-                            <p className='text-light_white text-left'>{userData.phone_number.substring(3)}</p>
+                            <p className='text-light_white text-left'>{userData.phone_number?.substring(3)}</p>
                         </div>
                         {isEditing && <button className='bg-button_purple text-white px-3 py-2 rounded-md'>Edit</button>}
                     </div>
