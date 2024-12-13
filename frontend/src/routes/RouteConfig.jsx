@@ -6,13 +6,14 @@ import NotActive from "../components/common/NotActive";
 import PublicRoute from "./PublicRoute";
 import PrivateRoute from "./PrivateRoute";
 import ChanneliCallback from "../components/loginSignUp/ChanneliCallback";
+import SpaceLayout from "../components/layout/SpaceLayout";
 
 const routes = [
     {
         path: '/',
         element: (
             // <PublicRoute>
-                <LoginSignup />
+            <LoginSignup />
             // </PublicRoute>
         ),
     },
@@ -21,12 +22,16 @@ const routes = [
 
         element: (
             // <PublicRoute>
-                <ChanneliCallback />
+            <ChanneliCallback />
             // </PublicRoute>
         )
     },
     {
-        element: <MainLayout />,
+        element: (
+            // <PrivateRoute>
+                <MainLayout />
+            // </PrivateRoute>
+        ),
         children: [
             {
                 path: 'dashboard',
@@ -36,19 +41,15 @@ const routes = [
                     </PrivateRoute>
                 ),
                 children: [
-                    { index: true, element: <NotActive /> },
-                    {
-                        path: 'profile',
-                        element: (
-                            <PrivateRoute>
-                                <UserProfile />
-                            </PrivateRoute>
-                        )
-                    }
                 ]
             },
             {
-                path: 'spaces',
+                path: 'spaces/:spaceId',
+                element: (
+                    <PrivateRoute>
+                        <SpaceLayout />
+                    </PrivateRoute> 
+                ),
             }
         ]
     },

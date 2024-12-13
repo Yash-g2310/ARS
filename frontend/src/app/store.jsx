@@ -2,17 +2,20 @@ import { configureStore,combineReducers } from '@reduxjs/toolkit'
 import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import authReducer from '../features/auth/authSlice'
+import spaceReducer from '../features/space/spaceSlice'
+import assignmentReducer from '../features/assignment/assignmentSlice'
 import createAuthMiddleware from '../features/auth/authMiddleware'
 
 const persistConfig ={
     key: 'root',
     storage,
-    whitelist: ['auth',],
+    whitelist: ['auth','space','assignment',],
 }
 
 const rootReducer = combineReducers({
     auth: authReducer,
-    // dashboard: dashboardReducer,
+    space: spaceReducer,
+    assignment: assignmentReducer,
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

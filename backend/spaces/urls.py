@@ -15,6 +15,6 @@ urlpatterns = [
     path('<int:pk>/create-subspace/',views.SubSpaceCreateView.as_view(),name='create_subspace'),
     path('<int:pk>/',views.SubSpaceListView.as_view(),name='subspace_list'),
     path('<int:pk>/<int:id>/details/',views.SubSpaceDetailView.as_view(),name='subspace_list'),
-    path('<int:pk>/<int:id>/members/',views.SubSpaceMembersListView.as_view(),name='space_members_list'),
+    path('<int:pk>/<int:id>/members/',views.SubSpaceMembersListView.as_view(),name='subspace_members_list'),
     path('<int:pk>/<int:id>/', include(('assignments.urls', 'assignments'), namespace='assignments')),
 ]
