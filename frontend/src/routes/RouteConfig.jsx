@@ -7,6 +7,7 @@ import PublicRoute from "./PublicRoute";
 import PrivateRoute from "./PrivateRoute";
 import ChanneliCallback from "../components/loginSignUp/ChanneliCallback";
 import SpaceLayout from "../components/layout/SpaceLayout";
+import SpaceDetailComponent from "../components/layout/SpaceDetailComponent";
 
 const routes = [
     {
@@ -29,7 +30,7 @@ const routes = [
     {
         element: (
             // <PrivateRoute>
-                <MainLayout />
+            <MainLayout />
             // </PrivateRoute>
         ),
         children: [
@@ -46,10 +47,29 @@ const routes = [
             {
                 path: 'spaces/:spaceId',
                 element: (
-                    <PrivateRoute>
+                    // <PrivateRoute>
                         <SpaceLayout />
-                    </PrivateRoute> 
+                    // </PrivateRoute>
                 ),
+                children: [
+                    {
+                        path: '',
+                        element: (
+                            <PrivateRoute>
+                                <NotActive />
+                            </PrivateRoute>
+                        )
+                    },
+                    {
+                        path: 'details',
+                        element: (
+                            <PrivateRoute>
+                                <SpaceDetailComponent />
+                            </PrivateRoute>
+                        )
+                    }
+
+                ]
             }
         ]
     },

@@ -9,7 +9,7 @@ const SpaceSideBar = () => {
     const navigate = useNavigate()
     const { spaceSideBarData, isLoading, isError } = useSelector(state => state.space)
     const [hoverIndex, setHoverIndex] = useState(null)
-    const [clickIndex, setClickIndex] = useState(Infinity)
+    const [clickIndex, setClickIndex] = useState(null)
     const dummyData = ['https://robohash.org/10.37.201.177.png', 'https://robohash.org/1037.201.177.png', 'https://robohash.org/103.201.177.png', 'https://robohash.org/103.37.201.png']
 
     useEffect(() => {

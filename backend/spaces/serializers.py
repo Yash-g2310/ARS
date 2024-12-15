@@ -25,12 +25,14 @@ class SpaceCreateDetailSerializer(serializers.ModelSerializer):
     space_members = serializers.SerializerMethodField()
     sub_spaces = serializers.SerializerMethodField()
     owner_username = serializers.SerializerMethodField()
+    owner_profile_pic = serializers.SerializerMethodField()
     class Meta:
         model = Space
         fields = [
             'id',
             'owner',
             'owner_username',
+            'owner_profile_pic',
             'space_name',
             'space_bio',
             'create_date',
@@ -44,6 +46,12 @@ class SpaceCreateDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_owner_username(self,obj):
+        return obj.owner.username
+    
+    def get_owner_profile_pic(self,obj):
+        print('riddhi moti bhais')
+        print(obj.owner.userprofile.profile_image)
+        print(obj.owner.userprofile)
         return obj.owner.username
     
     def create(self, validated_data):

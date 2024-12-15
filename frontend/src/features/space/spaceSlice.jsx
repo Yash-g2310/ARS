@@ -40,7 +40,7 @@ export const fetchSpaceDetails = createAsyncThunk('space/fetchSpaceDetails', asy
 })
 
 export const fetchAssignmentList = createAsyncThunk('space/fetchAssignmentList', async ({username,spaceId,subspaceId}, { rejectWithValue, }) => {
-    console.log('fetchAssignmentList');
+    console.log('inside actual defn of fetchAssignmentList');
     try {
         const response = await assignmentAPI.getAssignmentList(username,spaceId,subspaceId);
         console.log(response.data);
@@ -56,6 +56,7 @@ export const fetchAssignmentList = createAsyncThunk('space/fetchAssignmentList',
 const initialState = {
     isLoading: false,
     isSubspaceLoading: false,
+    isAssignmentLoading: false,
     isError: false,
     errorMessage: '',
     spaceSideBarData: null,
@@ -134,11 +135,11 @@ const spaceSlice = createSlice({
                 state.errorMessage = action.payload.error;
             })
             .addCase(fetchAssignmentList.pending, (state) => {
-                state.isLoading = true;
+                state.isAssignmentLoading = true;
                 state.isError = false;
             })
             .addCase(fetchAssignmentList.fulfilled, (state, action) => {
-                state.isLoading = false;
+                state.isAssignmentLoading = false;
                 state.isError = false;
                 state.errorMessage = '';
                 if (!state.assignmentList) {
@@ -150,7 +151,7 @@ const spaceSlice = createSlice({
                 };
             })
             .addCase(fetchAssignmentList.rejected, (state, action) => {
-                state.isLoading = false;
+                state.isAssignmentLoading = false;
                 state.isError = true;
                 state.errorMessage = action.payload.error;
             })

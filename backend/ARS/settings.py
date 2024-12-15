@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'assignments',
     'chats',
+    'channels',
     'spaces',
     'submissions',
     'users',
@@ -187,3 +188,9 @@ EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
 FRONTEND_BASE_URL = env('FRONTEND_BASE_URL')
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
