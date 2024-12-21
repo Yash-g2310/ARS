@@ -27,8 +27,6 @@ const AssignmentListBlock = ({ subspaceId, spaceId }) => {
         fetchAssignments();
     }, [dispatch, subspaceId, spaceId, assignmentList]);
 
-    // // Fix: Only render if expandedSubspace matches subspaceId
-    // if (expandedSubspace !== subspaceId) return null;
     const currentAssignmentsList = assignmentList?.[subspaceId] || [];
     if (isAssignmentLoading) return (<div>Loading... </div>)
     if (isError) return (<div>{errorMessage}</div>)

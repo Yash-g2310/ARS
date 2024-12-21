@@ -3,6 +3,7 @@ import { use } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
 const SpaceDetailComponent = () => {
+    console.log('in SpaceDetailComponent')
     const { spaceDetail } = useOutletContext()
     console.log(spaceDetail)
     const username = localStorage.getItem('username')
@@ -11,20 +12,20 @@ const SpaceDetailComponent = () => {
         <div className='bg-backg_1 flex flex-col p-2 w-lg h-full text-left overflow-auto'>
             <div className='bg-backg_dark rounded-md overflow-auto [&::-webkit-scrollbar]:hidden mt-2  h-full'>
                 <div className='bg-black rounded-t-md max-h-28 overflow-hidden h-full'>
-                    {spaceDetail.space_background && <img src={`${spaceDetail.space_background}`} className='w-full text-white rounded-t-md' alt="banner-image" />}
+                    {spaceDetail?.space_background && <img src={`${spaceDetail?.space_background}`} className='w-full text-white rounded-t-md' alt="banner-image" />}
                 </div>
                 <div className='flex flex-row justify-between px-8 items-center my-2 '>
                     <div className='flex flex-row items-center gap-3'>
                         <div className='w-14 h-14'>
-                            {spaceDetail.space_profile ===null ? (
+                            {spaceDetail?.space_profile ===null ? (
                                 <div className='w-14 h-14 bg-button_purple rounded-full text-xl text-white flex items-center justify-center'>
-                                    {spaceDetail.space_name.charAt(0).toUpperCase()}
+                                    {spaceDetail?.space_name.charAt(0).toUpperCase()}
                                 </div>
                             ) : (
-                                <img src={`${spaceDetail.space_profile}`} alt="profile-image" className='w-full h-full rounded-full' />
+                                <img src={`${spaceDetail?.space_profile}`} alt="profile-image" className='w-full h-full rounded-full' />
                             )}
                         </div>
-                        <h2 className='text-white font-roboto tracking-wider font-semibold'>{spaceDetail.space_name}</h2>
+                        <h2 className='text-white font-roboto tracking-wider font-semibold'>{spaceDetail?.space_name}</h2>
                     </div>
                 </div>
 
@@ -34,28 +35,28 @@ const SpaceDetailComponent = () => {
                         <div className='px-4 flex flex-row justify-between items-center '>
                             <div className='my-2 min-w-[calc(100%/2)]'>
                                 <h3 className='text-light_gray text-left text-sm/4 tracking-wide'>Description</h3>
-                                <p className='text-light_white text-left  text-sm/2 tracking-wide font-light'>{spaceDetail.space_bio}</p>
+                                <p className='text-light_white text-left  text-sm/2 tracking-wide font-light'>{spaceDetail?.space_bio}</p>
                             </div>
                             <div className='bg-[#202225] p-2 rounded-md m-2 min-w-[calc(100%/2)] px-4'>
                                 <div className='flex flex-col justify-between items-start'>
                                     <div className='my-2'>
                                         <h3 className='text-[#FAA61A] text-left font-sans'>Created By</h3>
                                         <div className='flex flex-row gap-2 items-center'>
-                                            {spaceDetail.owner_profile_pic === '' ? (
+                                            {spaceDetail?.owner_profile_pic === '' ? (
                                                 <div className='w-8 h-8 bg-button_purple rounded-full flex items-center justify-center'>
-                                                    {spaceDetail.owner_username.charAt(0).toUpperCase()}
+                                                    {spaceDetail?.owner_username.charAt(0).toUpperCase()}
                                                 </div>) : (
-                                                <img src={`${import.meta.env.VITE_API_BASE_URL}/${spaceDetail.owner_profile_pic}`} alt="profile-image" className='w-8 h-8 rounded-full' />
+                                                <img src={`${import.meta.env.VITE_API_BASE_URL}/${spaceDetail?.owner_profile_pic}`} alt="profile-image" className='w-8 h-8 rounded-full' />
                                             )
                                             }
-                                            <p className='text-light_white text-left font-light'>{spaceDetail.owner_username}</p>
+                                            <p className='text-light_white text-left font-light'>{spaceDetail?.owner_username}</p>
                                         </div>
                                     </div>
                                     <div className='my-2'>
                                         <h3 className='text-[#FAA61A] text-left font-sans'>Details</h3>
                                         <div className='flex flex-row gap-2 '>
                                             <p className='text-light_white text-left font-light'>creation date: </p>
-                                            <p className='text-light_white text-left font-light'>{spaceDetail.create_date}</p>
+                                            <p className='text-light_white text-left font-light'>{spaceDetail?.create_date.substr(0,10)}</p>
                                         </div>
                                         <div className='flex flex-row gap-2'>
                                             <p className='text-light_white text-left font-light'>member count: </p>
@@ -74,11 +75,6 @@ const SpaceDetailComponent = () => {
                     <div className='text-white bg-backg_1 mx-3 my-2 px-3 py-2 rounded-md '>
                         <div className='flex justify-between items-center mb-4 '>
                             <h3 className='tracking-wider text-light_white bg-[#252428] px-2 rounded-md w-full py-1'>Members ({spaceDetail.member_count})</h3>
-                            {spaceDetail.owner_username === username && (
-                                <button className='bg-button_purple text-white px-3 py-1 rounded-md text-sm'>
-                                    Invite Members
-                                </button>
-                            )}
                         </div>
                         <div className='px-4 grid grid-cols-2 gap-4 max-h-52 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
                             {spaceDetail.space_members?.map((member) => (
@@ -104,11 +100,6 @@ const SpaceDetailComponent = () => {
                     <div className='text-white bg-backg_1 mx-3 my-2 px-3 py-2 rounded-md'>
                         <div className='flex justify-between items-center mb-4'>
                             <h3 className='tracking-wider text-light_white bg-[#252428] px-2 rounded-md w-full py-1'>Sub Spaces ({spaceDetail.sub_space_count})</h3>
-                            {spaceDetail.owner_username === username && (
-                                <button className='bg-button_purple text-white px-3 py-1 rounded-md text-sm'>
-                                    Create Subspace
-                                </button>
-                            )}
                         </div>
                         <div className='px-4 space-y-2 max-h-56 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
                             {spaceDetail.sub_spaces?.map((subspace) => (

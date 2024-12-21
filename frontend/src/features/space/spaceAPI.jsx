@@ -5,10 +5,16 @@ export const spaceAPI = {
     getSpaceSidebar: (username) => axiosInstance.get(`/${username}/`),
 
     // get subspace dashboard
-    getSubSpaceSideDrawer: (username,spaceId)=> axiosInstance.get(`/${username}/${spaceId}/`),
-
+    getSubSpaceSideDrawer: (username,spaceId)=> {
+        if(username && spaceId)
+            return axiosInstance.get(`/${username}/${spaceId}/`)
+    },
+    
     // get space details
-    getSpaceDetails: (username,spaceId)=> axiosInstance.get(`/${username}/${spaceId}/details/`),
+    getSpaceDetails: (username,spaceId)=> {
+        if(username && spaceId)
+            return axiosInstance.get(`/${username}/${spaceId}/details/`)
+    },
 
     // create space
     createSpace: (username,spaceData) => axiosInstance.post(`/${username}/create-space/`,spaceData),

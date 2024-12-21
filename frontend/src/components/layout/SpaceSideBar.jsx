@@ -3,6 +3,7 @@ import { useSelector} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 const SpaceSideBar = () => {
+    // console.log('in SpaceSideBar')
     const navigate = useNavigate()
     const { spaceSideBarData, } = useSelector(state => state.space)
     const [hoverIndex, setHoverIndex] = useState(null)
@@ -11,10 +12,8 @@ const SpaceSideBar = () => {
     const handleClick = (spaceId) => {
         setClickIndex(spaceId)
         if (spaceId === Infinity) navigate('/dashboard')
-        else navigate(`spaces/${spaceId}`)
+        else if (spaceId) navigate(`spaces/${spaceId}`)
     }
-    console.log('in SpaceSideBar')
-    // console.log(spaceSideBarData)
 
     return (
         <div className='inline-flex flex-col bg-backg_dark h-screen text-white overflow-auto [&::-webkit-scrollbar]:hidden'>

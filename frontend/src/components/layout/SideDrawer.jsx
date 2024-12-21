@@ -1,27 +1,39 @@
 import React from 'react'
+import { useSelector } from 'react-redux';
 
-const SideDrawer = ({userData, toggleComponentState}) => {
+const SideDrawer = ({ toggleComponentState }) => {
+    console.log('in SideDrawer')
+    const { user, isLoading, isError, errorMessage } = useSelector(state => state.auth);
     // console.log(toggleComponentState)
     // console.log(userData)
-    if (!userData) {
-        return <div>Loading user data...</div>;
-    }
+    // if (!userData) {
+    //     return <div>Loading user data...</div>;
+    // }
+    // console.log(user)
+    if (isLoading) return <div>Loading...</div>;
+    if (isError) return <div>Error: {errorMessage}</div>;
     return (
         <div className='p-2 text-light_white flex flex-col gap-20 pt-6'>
             <div className='max-h-12 relative'>
                 <div className='bg-black rounded-t-md max-h-16 overflow-hidden h-full'>
-                    <img src={userData?.background_image} alt="" className='w-fit rounded-t-lg' />
+                    <img src={user?.background_image} alt="" className='w-fit rounded-t-lg' />
                 </div>
                 <div className='absolute top-full left-2'>
                     <div className='flex flex-row items-center gap-3'>
                         <div className='w-16 h-16 '>
-                            <img
-                                src={userData?.profile_image} 
-                                alt=""
-                                className='w-full h-full rounded-full border-4 border-backg_mid_dark bg-backg_dark transition-all duration-200 hover:border-gray-600 shadow-lg '
-                            />
+                            {user?.profile_image === null ? (
+                                <div className='w-full h-full bg-button_purple rounded-full text-xl text-white font-semibold flex items-center justify-center border-2 border-backg_mid_dark transition-all duration-200 hover:border-gray-600 shadow-lg hover:bg-[#2752C4]'>
+                                    {user?.first_name.charAt(0).toUpperCase()}
+                                </div>
+                            ) : (
+                                <img
+                                    src={user?.profile_image}
+                                    alt=""
+                                    className='w-full h-full rounded-full border-4 border-backg_mid_dark bg-backg_dark transition-all duration-200 hover:border-gray-600 shadow-lg '
+                                />
+                            )}
                         </div>
-                        <h2 className='text-white font-roboto'>{userData?.username}</h2>
+                        <h2 className='text-white font-roboto'>{user?.username}</h2>
                     </div>
                 </div>
             </div>

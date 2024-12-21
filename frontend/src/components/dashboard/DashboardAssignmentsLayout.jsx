@@ -4,6 +4,7 @@ import DashboardReviewerAssignments from './DashboardReviewerAssignments'
 import { useSelector } from 'react-redux'
 
 const DashboardAssignmentsLayout = () => {
+    console.log('in DashboardAssignmentsLayout')
     const { reviewerAssignments,revieweeAssignments } = useSelector(state => state.auth)
     console.log(reviewerAssignments)
     console.log(revieweeAssignments)

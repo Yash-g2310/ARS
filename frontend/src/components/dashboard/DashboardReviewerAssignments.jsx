@@ -2,6 +2,7 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 
 const DashboardReviewerAssignments = () => {
+    console.log('in DashboardReviewerAssignments')
     const { reviewerAssignments } = useSelector(state => state.auth)
     console.log(reviewerAssignments)
 

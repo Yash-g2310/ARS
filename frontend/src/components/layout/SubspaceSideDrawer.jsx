@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import AssignmentListBlock from './AssignmentListBlock';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setComponentState }) => {
+  console.log('in SubspaceSideDrawer')
+  const { spaceId } = useParams();
   const navigate = useNavigate();
-
+  console.log(subspaces)
+  console.log(spaceDetail)
   const [expandedSubspace, setExpandedSubspace] = useState(null);
-  if (!spaceDetail) {
+  if (!spaceDetail || !subspaces) {
     return <div className="p-4 text-light_white">Loading space data...</div>;
   }
 
@@ -20,14 +24,7 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
       showSpaceDetails: !componentState.showSpaceDetails
     });
   }
-  useEffect(() => {
-    if (componentState.showSpaceDetails) {
-      navigate(`/spaces/${spaceDetail.id}/details/`);
-    }
-    else {
-      navigate(`/spaces/${spaceDetail.id}/`);
-    }
-  },[componentState.showSpaceDetails])
+
 
   return (
     <div className='text-light_white flex flex-col gap-3 pt-4'>
@@ -56,9 +53,8 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
 
       <div className='flex flex-col gap-2 p-2 pt-0'>
         <div className='flex flex-row gap-2'>
-          <img src="../assets/svg/browse_space.svg" alt="" />
+          <img src="/assets/svg/browse_space.svg" alt="" />
           <h3 className='text-light_gray font-medium px-2'>Subspaces</h3>
-
         </div>
         {subspaces && subspaces.length > 0 ? (
           subspaces.map((subspace) => (
@@ -101,10 +97,11 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
                 </button>
               </div>
 
-              {expandedSubspace === subspace.id && <div className={`overflow-hidden transition-all duration-300 ${expandedSubspace === subspace.id ? 'max-h-96' : 'max-h-0'
-                }`}>
-                <AssignmentListBlock spaceId={spaceDetail.id} subspaceId={subspace.id} />
-              </div>}
+              {expandedSubspace === subspace.id &&
+                <div className={`overflow-hidden transition-all duration-300 ${expandedSubspace === subspace.id ? 'max-h-96' : 'max-h-0'
+                  }`}>
+                  <AssignmentListBlock spaceId={spaceDetail.id} subspaceId={subspace.id} />
+                </div>}
             </div>
           ))
         ) : (

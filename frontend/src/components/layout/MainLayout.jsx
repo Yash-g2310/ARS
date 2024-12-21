@@ -7,13 +7,14 @@ import { fetchSpaceSideBarData } from '../../features/space/spaceSlice';
 
 
 const MainLayout = () => {
+    console.log('in MainLayout')
     const dispatch = useDispatch()
     const { user, isLoading, isError, errorMessage } = useSelector(state => state.auth)
     const { spaceSideBarData, isSpaceLoading, isSpaceError, spaceErrorMessage } = useSelector(state => state.space)
     useEffect(() => {
-        // console.log('checking user profile');
+        console.log('checking user profile');
         if (user === null) {
-            // console.log('fetching user profile');
+            console.log('fetching user profile');
             const fetchUserProfileData = async () => {
                 // console.log('inside fetchUserProfileData');
                 try {
@@ -23,15 +24,14 @@ const MainLayout = () => {
                 }
             }
             fetchUserProfileData();
-            // console.log('user profile fetched');
+            console.log('user profile fetched');
         }
     }, [dispatch])
-    console.log('in MainLayout')
 
     useEffect(() => {
-        // console.log('checking space sidebar data');
+        console.log('checking space sidebar data');
         const getSpaceSidebarData = async () => {
-            // console.log('inside getSpaceSidebarData ie data is fetching');
+            console.log('inside getSpaceSidebarData ie data is fetching');
             try {
                 const username = localStorage.getItem('username')
                 await dispatch(fetchSpaceSideBarData(username)).unwrap()
@@ -40,8 +40,10 @@ const MainLayout = () => {
                 console.error('Error fetching space sidebar data:', error)
             }
         }
-        if (spaceSideBarData === null)
+        if (spaceSideBarData === null){
             getSpaceSidebarData()
+            console.log('space sidebar data fetched')
+        }
     }, [dispatch])
 
     if (isLoading || isSpaceLoading) return <div>Loading...</div>

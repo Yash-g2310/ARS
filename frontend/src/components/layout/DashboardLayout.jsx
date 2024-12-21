@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react'
 import SideDrawer from './SideDrawer'
 import NotActive from '../common/NotActive';
 import UserProfile from '../dashboard/UserProfile';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import DashboardAssignmentsLayout from '../dashboard/DashboardAssignmentsLayout';
 
 const DashboardLayout = () => {
-    const { user, revieweeAssignment, reviewerAssignment, isLoading, isError, errorMessage } = useSelector(state => state.auth);
-    const dispatch = useDispatch();
+    console.log('in DashboardLayout')
+    const { user, isLoading, isError, errorMessage } = useSelector(state => state.auth);
     const [componentState, setComponentState] = useState({
         showProfile: false,
         showDetails: false,
@@ -30,7 +30,7 @@ const DashboardLayout = () => {
     return (
         <div className='flex flex-row'>
             <div className='w-1/6 min-w-[calc(100%/6)] max-w-[calc(100%/6)] bg-[#2f3133] border-r border-gray-500 h-screen overflow-auto [&::-webkit-scrollbar]:hidden'>
-                <SideDrawer userData={user} toggleComponentState={toggleComponentState} />
+                <SideDrawer toggleComponentState={toggleComponentState} />
             </div>
             <div className='flex flex-col w-5/6 min-w-[calc(500%/6)] max-w-[calc(500%/6)] h-screen '>
                 <div className='w-full h-10 min-h-10 border-b border-gray-500 bg-backg_1 text-light_gray text-left px-4 flex items-center '>
@@ -43,7 +43,7 @@ const DashboardLayout = () => {
                     <div className='bg-backg_1 grow overflow-auto h-full border-r border-gray-500 border-r[50%]'>
 
                         {componentState.showProfile ? (
-                            <UserProfile userData={user} className='overflow-auto' />
+                            <UserProfile className='overflow-auto' />
                         ) : (
                             <NotActive />
                         )}

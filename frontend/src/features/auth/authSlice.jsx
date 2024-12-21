@@ -131,61 +131,61 @@ const authSlice = createSlice({
             })
             .addCase(checkSession.fulfilled, (state, action) => {
                 state.isAuthenticated = action.payload.session;
-                state.isLoading = false;
                 state.isError = false;
                 state.errorMessage = '';
+                state.isLoading = false;
             })
             .addCase(checkSession.rejected, (state, action) => {
                 console.error('Error checking session:', action.payload);
-                state.isLoading = false;
                 state.isAuthenticated = false;
                 state.isError = true;
                 state.errorMessage = action.payload.error;
+                state.isLoading = false;
             })
             .addCase(registerUser.pending, (state, action) => {
                 state.isLoading = true;
             })
             .addCase(registerUser.fulfilled, (state, action) => {
                 // console.log(action.payload);
-                state.isLoading = false;
                 state.isRegistered = true;
+                state.isLoading = false;
             })
             .addCase(registerUser.rejected, (state, action) => {
                 // console.log(action.payload);
-                state.isLoading = false;
                 state.isRegistered = false;
                 state.isRegisteredError = true;
                 state.registeredError = action.payload.error;
+                state.isLoading = false;
             })
             .addCase(login.pending, (state, action) => {
                 state.isLoading = true;
             })
             .addCase(login.fulfilled, (state, action) => {
-                state.isLoading = false;
                 state.isAuthenticated = true;
                 localStorage.setItem('username', action.payload.user['username']);
+                state.isLoading = false;
             })
             .addCase(login.rejected, (state, action) => {
                 // console.log(action.payload);
-                state.isLoading = false;
                 state.isAuthenticated = false;
                 state.isError = true;
                 state.errorMessage = action.payload.error;
+                state.isLoading = false;
             })
             .addCase(fetchUserProfile.pending, (state, action)=>{
                 state.isLoading = true;
             })
             .addCase(fetchUserProfile.fulfilled, (state, action)=>{
                 // console.log(action.payload);
-                state.isLoading = false;
                 state.user = action.payload.profile;
                 state.revieweeAssignments = action.payload.revieweeAssignments;
                 state.reviewerAssignments = action.payload.reviewerAssignments;
+                state.isLoading = false;
             })
             .addCase(fetchUserProfile.rejected, (state, action)=>{
-                state.isLoading = false;
                 state.isError = true;
                 state.errorMessage = action.payload.error;
+                state.isLoading = false;
             })
     }
 })
