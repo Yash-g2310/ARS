@@ -5,7 +5,7 @@ import { checkSession } from "../features/auth/authSlice";
 
 const PrivateRoute = ({ children }) => {
     const dispatch = useDispatch();
-    const { isAuthenticated,isLoading } = useSelector(state=>state.auth)
+    const { isAuthenticated,isLoading,isError,errorMessage } = useSelector(state=>state.auth)
 
     useEffect(() => {
         console.log('checking session in private route');
@@ -22,6 +22,7 @@ const PrivateRoute = ({ children }) => {
     },[dispatch])
 
     if(isLoading) return <div>Loading auth state...</div>;
+    if(isError) return <div>{errorMessage}</div>;
     return isAuthenticated ? children : <Navigate to="/" />;
 }
 

@@ -50,9 +50,10 @@ class SpaceCreateDetailSerializer(serializers.ModelSerializer):
     
     def get_owner_profile_pic(self,obj):
         print('riddhi moti bhais')
-        print(obj.owner.userprofile.profile_image)
-        print(obj.owner.userprofile)
-        return obj.owner.username
+        if obj.owner.userprofile.profile_image:
+            return obj.owner.userprofile.profile_image.url
+        else:
+            return ''
     
     def create(self, validated_data):
         space = super().create(validated_data)
@@ -60,14 +61,19 @@ class SpaceCreateDetailSerializer(serializers.ModelSerializer):
         return space
 
     def get_space_members(self,obj):
+        print([member.user.userprofile.profile_image for member in obj.spacemember_set.all()])
         if self.context['request'].method == 'GET':
-            return [{'space_member_id':member.id, 'space_member_username':member.user.username} for member in obj.spacemember_set.all()]
+            return [{'space_member_id':member.id, 'space_member_username':member.user.username, 'space_member_profile_image':member.user.userprofile.profile_image.url if member.user.userprofile.profile_image else '' 
+            } for member in obj.spacemember_set.all()]
         else:
             return []
 
     def get_sub_spaces(self,obj):
         if self.context['request'].method == 'GET':
-            return [{'subspace_id':subspace.id,'subspace_name':subspace.sub_space_name,} for subspace in obj.subspace_set.all()]
+            return [{
+                'subspace_id':subspace.id,
+                'subspace_name':subspace.sub_space_name,
+                } for subspace in obj.subspace_set.all()]
         else:
             return []
             

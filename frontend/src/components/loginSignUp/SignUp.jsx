@@ -1,13 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import '../../styles/loginSignupStyles.css'
 import LoginButton from './LoginButton'
 import { useForm } from 'react-hook-form'
 import { Tooltip } from '@mui/material'
 import PasswordEye from './PasswordEye'
+import { useDispatch, useSelector } from 'react-redux'
+import { registerUser, clearError, setRegisterError,channeliLogin } from '../../features/auth/authSlice'
 
 const SignUp = () => {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+    const dispatch = useDispatch()
+    const { isRegistered, registeredError, isLoading, isRegisteredError } = useSelector(state => state.auth)
 
     const {
         register,
@@ -18,7 +22,50 @@ const SignUp = () => {
         mode: "onChange"
     })
 
-    const onSubmit = (data) => console.log(data)
+    useEffect(() => {
+        if (isRegistered) {
+            const timer = setTimeout(() => {
+                dispatch(clearError());
+            }, 5000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [isRegistered, dispatch]);
+    useEffect(() => {
+        // console.log(isRegisteredError, registeredError)
+        if (isRegisteredError) {
+            const timer = setTimeout(() => {
+                dispatch(clearError());
+            }, 5000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [isRegisteredError, dispatch]);
+
+    const onSubmit = async (data) => {
+        dispatch(clearError());
+        try {
+            await dispatch(registerUser(data)).unwrap();
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            dispatch(setRegisterError(error));
+        }
+    }
+
+    console.log('signup')
+
+    const errorMessages = [];
+    if (isRegisteredError && registeredError) {
+        for (const [key, value] of Object.entries(registeredError)) {
+            errorMessages.push(
+                <div key={key} className='bg-red-500 text-white mb-2 pl-2 rounded-md'>
+                    {key}: {value}
+                </div>
+            );
+        }
+    }
+
+    if (isLoading) return <div>Loading...</div>
 
     return (
         <div>
@@ -183,13 +230,16 @@ const SignUp = () => {
                                 <PasswordEye showPassword={showConfirmPassword} setShowPassword={setShowConfirmPassword} />
                             </div>
                         </div>
-
+                        {isRegisteredError && errorMessages}
+                        {/* {isRegisteredError && <div className='bg-red-500 text-white mb-2 pl-2 rounded-md'>{
+                            }</div>} */}
+                        {isRegistered && <div className='bg-green-500 text-white mb-2 pl-2 rounded-md'>Registered Successfully, Now you can log in</div>}
                         <div>
                             <button
                                 type="submit"
                                 className="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                                 disabled={isSubmitting}>
-                                {isSubmitting?"Submitting...":"Sign Up"}
+                                {isSubmitting ? "Submitting..." : "Sign Up"}
                             </button>
                         </div>
                     </form>
@@ -202,7 +252,7 @@ const SignUp = () => {
                     </span>
                     <div className='flex flex-row justify-around'>
                         <LoginButton src={"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"} alt={"Google Logo"} text="Google" />
-                        <LoginButton src={"https://channeli.in/branding/site/logo.svg"} alt={"Channeli Logo"} text="Channeli" />
+                        <LoginButton src={"https://channeli.in/branding/site/logo.svg"} alt={"Channeli Logo"} text="Channeli" onClick={async()=>{await dispatch(channeliLogin()).unwrap()}} />
                     </div>
 
                 </div>

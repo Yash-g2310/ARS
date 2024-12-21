@@ -29,17 +29,17 @@ const routes = [
     },
     {
         element: (
-            // <PrivateRoute>
+            <PrivateRoute>
             <MainLayout />
-            // </PrivateRoute>
+            </PrivateRoute>
         ),
         children: [
             {
                 path: 'dashboard',
                 element: (
-                    <PrivateRoute>
+                    // <PrivateRoute>
                         <DashboardLayout />
-                    </PrivateRoute>
+                    // </PrivateRoute>
                 ),
                 children: [
                 ]
@@ -55,17 +55,17 @@ const routes = [
                     {
                         path: '',
                         element: (
-                            <PrivateRoute>
+                            // <PrivateRoute>
                                 <NotActive />
-                            </PrivateRoute>
+                            // </PrivateRoute>
                         )
                     },
                     {
                         path: 'details',
                         element: (
-                            <PrivateRoute>
+                            // <PrivateRoute>
                                 <SpaceDetailComponent />
-                            </PrivateRoute>
+                            // </PrivateRoute>
                         )
                     }
 

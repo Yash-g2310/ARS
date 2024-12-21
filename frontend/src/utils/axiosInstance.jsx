@@ -5,18 +5,35 @@ const axiosInstance = axios.create({
     withCredentials: true
 });
 
-const getCsrfToken = async () => {
-    return document.cookie
-        .split('; ')
-        .find(row => row.startsWith('csrftoken='))
-        ?.split('=')[1];
+const getCsrfToken = () => {
+    const csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+    // console.log(csrfToken)
+    return csrfToken;
 }
+
+const fetchCsrfToken = async () =>{
+    try{
+        const response = await axiosInstance.get('/csrf/')
+        const csrfToken = response.data.csrfToken;
+        document.cookie = `csrftoken=${csrfToken}; path=/; SameSite=Lax`;
+        return csrfToken;
+    } catch (error) {
+        console.error('Failed to fetch CSRF token', error);
+        throw error;
+    }
+};
 
 const ensureCsrfToken = async () => {
     let csrfToken = getCsrfToken();
+    // console.log('do i have csrf token before?', csrfToken)
     if (!csrfToken) {
-        csrfToken = await axiosInstance.get('/csrf/');
+        // console.log('fetching csrf token')
+        csrfToken = await fetchCsrfToken();
     }
+    // console.log('do i have csrf token after?', csrfToken)
     return csrfToken;
 }
 
@@ -40,30 +57,33 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-axiosInstance.interceptors.response.use(
-    response => response,
-    async (error) => {
-        try{
-            if (error.response?.status === 401 &&
-                !error.config.url.includes('/login/')) {
-                const isSession = await axiosInstance.get('/session/')
-                if (!isSession.data.session) {
-                    import('../app/store').then(({store})=>{
-                        store.dispatch(logout());
-                    })
-                }
-            }
+// axiosInstance.interceptors.response.use(
+//     response => response,
+//     async (error) => {
+//         try{
+//             if (error.response?.status === 401 &&
+//                 !error.config.url.includes('/login/')) {
+//                     console.log('Session expired. Logging out...')
+//                 const isSession = await axiosInstance.get('/session/')
+//                 console.log(isSession)
+//                 if (!isSession.data.session) {
+//                     import('../app/store').then(({store})=>{
+//                         store.dispatch(logout());
+//                     })
+//                     console.log('Logged out')
+//                 }
+//             }
     
-            if (error.response?.status === 403) {
-                import('../app/store').then(({store})=>{
-                    store.dispatch(setAuthError('You do not have permission for this action.'));
-                })
-            }
-            return Promise.reject(error)
-        } catch (error) {
-            return Promise.reject(error);
-        }
-    }
-)
+//             if (error.response?.status === 403) {
+//                 import('../app/store').then(({store})=>{
+//                     store.dispatch(setAuthError('You do not have permission for this action.'));
+//                 })
+//             }
+//             return Promise.reject(error)
+//         } catch (error) {
+//             return Promise.reject(error);
+//         }
+//     }
+// )
 
 export default axiosInstance;

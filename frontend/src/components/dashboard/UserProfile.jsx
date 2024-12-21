@@ -19,7 +19,7 @@ const UserProfile = ({ userData }) => {
                         <div className='w-16 h-16'>
                             <img src={`${userData.profile_image}`} alt="profile-image" className='w-full h-full rounded-full' />
                         </div>
-                        <h2 className='text-white font-roboto '>user123</h2>
+                        <h2 className='text-white font-roboto '>{userData.username}</h2>
                     </div>
                     <div>
                         <button onClick={handleEditClick} className='bg-button_purple text-white px-3 py-2 rounded-md'>Edit User Profile</button>

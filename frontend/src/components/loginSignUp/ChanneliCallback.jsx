@@ -1,12 +1,12 @@
 import React,{ useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector,useDispatch } from 'react-redux'
-import { channeliLoginCallBack, loginError, clearLoginError, fetchUserProfile} from '../../features/auth/authSlice'
+import { channeliLoginCallBack, loginError, clearError,} from '../../features/auth/authSlice'
 
 const ChanneliCallback = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    const { isAuthenticated,user } = useSelector(state => state.auth)
+    const { isAuthenticated,isLoading,isError,errorMessage } = useSelector(state => state.auth)
 
     
     useEffect(() => {
@@ -34,29 +34,14 @@ const ChanneliCallback = () => {
     
     
     useEffect(() => {
-        // console.log('authentication changed');
-        // console.log(isAuthenticated);
         if(isAuthenticated){
-            const fetchUserProfileData = async () => {
-                try{
-                    await dispatch(fetchUserProfile()).unwrap();
-                } catch (error){
-                    console.error('Error fetching user profile:', error);
-                }
-            }
-            fetchUserProfileData();
-            // console.log('profile fetched');
-        }
-    }, [isAuthenticated,dispatch])
-    
-    useEffect(() => {
-        if(isAuthenticated && user !== null){
-            dispatch(clearLoginError())
+            dispatch(clearError())
             navigate('/dashboard');
         }
-    }, [user,dispatch])
+    }, [isAuthenticated,dispatch])
 
-
+    if(isLoading) return <div>Loading...</div>
+    if(isError) return <div>{errorMessage}</div>
 
     return (
         <div>Completing Login...</div>

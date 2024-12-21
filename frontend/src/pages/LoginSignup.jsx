@@ -1,10 +1,40 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Login from '../components/loginSignUp/Login'
 import SignUp from '../components/loginSignUp/SignUp'
 import LoginSignupHeader from '../components/common/LoginSignupHeader'
+import { useDispatch, useSelector } from 'react-redux'
+import { checkSession, fetchUserProfile, clearError } from '../features/auth/authSlice'
+import { useNavigate } from 'react-router-dom'
 
 const LoginSignup = () => {
     const [isLogin, setIsLogin] = useState(true)
+    const navigate = useNavigate()
+    const dispatch = useDispatch();
+    const { isAuthenticated, user, isError, errorMessage } = useSelector(state => state.auth);
+
+    useEffect(() => {
+        // console.log('checking session');
+        const verifySession = async () => {
+            // console.log('verify session ran');
+            try {
+                await dispatch(checkSession()).unwrap();
+            } catch (error) {
+                console.error('Error checking session:', error);
+            }
+        }
+        verifySession();
+        // console.log('session checked');
+    }, [dispatch])
+
+    useEffect(() => {
+        // console.log('authentication changed', isAuthenticated);
+        if(isAuthenticated){
+            dispatch(clearError())
+            navigate('/dashboard');
+        }
+    }, [isAuthenticated, dispatch])
+    console.log('LoginSignup')
+
     return (
         <div className='flex flex-row w-1/2 justify-center items-center'>
             <div className='w-full'>

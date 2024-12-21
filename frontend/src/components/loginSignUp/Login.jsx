@@ -3,55 +3,16 @@ import '../../styles/loginSignupStyles.css'
 import LoginButton from './LoginButton'
 import { useForm } from 'react-hook-form'
 import PasswordEye from './PasswordEye';
-import { useNavigate } from 'react-router-dom';
-// import { channeliLogin } from '../services/loginapi';
+// import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { login, clearLoginError, channeliLogin, fetchUserProfile,checkSession } from '../../features/auth/authSlice';
-import { use } from 'react';
+import { login, clearError, channeliLogin, } from '../../features/auth/authSlice';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false)
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
     const dispatch = useDispatch();
     const {isAuthenticated,user,isError,errorMessage} = useSelector(state => state.auth);
-
-    useEffect(() => {
-        // console.log('checking session');
-        const verifySession = async () => {
-            try{
-                await dispatch(checkSession()).unwrap();
-            } catch (error){
-                console.error('Error checking session:', error);
-            }
-        }
-        verifySession();
-        // console.log('session checked');
-    }, [dispatch])
-
-    useEffect(() => {
-        // console.log('authentication changed');
-        if(isAuthenticated) {
-            const fetchUserProfileData = async () => {
-                try{
-                    await dispatch(fetchUserProfile()).unwrap();
-                } catch (error){
-                    console.error('Error fetching user profile:', error);
-                }
-            }
-            fetchUserProfileData();
-        }
-        // console.log('user profile fetched');
-    },[isAuthenticated,dispatch])
-
-    useEffect(() => {
-        // console.log('checking user and taking to dashboard');
-        // console.log(isAuthenticated, user);
-        if(isAuthenticated && user !== null){
-            dispatch(clearLoginError())
-            navigate('/dashboard');
-        }
-    },[isAuthenticated,user,dispatch])
-
+    console.log('login');
 
     const {
         register,
@@ -63,7 +24,7 @@ const Login = () => {
 
 
     const onSubmit = async (data) => {
-        dispatch(clearLoginError());
+        dispatch(clearError());
         try {
             // console.log('submitting');
             await dispatch(login(data)).unwrap();

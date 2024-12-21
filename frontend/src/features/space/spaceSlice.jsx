@@ -54,11 +54,11 @@ export const fetchAssignmentList = createAsyncThunk('space/fetchAssignmentList',
 })
 
 const initialState = {
-    isLoading: false,
+    isSpaceLoading: false,
     isSubspaceLoading: false,
     isAssignmentLoading: false,
-    isError: false,
-    errorMessage: '',
+    isSpaceError: false,
+    spaceErrorMessage: '',
     spaceSideBarData: null,
     subspaceSideDrawerData: {},
     spaceDetails: {},
@@ -70,36 +70,36 @@ const spaceSlice = createSlice({
     name: 'space',
     initialState,
     reducers: {
-        clearErrorMessage: (state) => {
-            state.isError = false;
-            state.errorMessage = '';
+        clearSpaceErrorMessage: (state) => {
+            state.isSpaceError = false;
+            state.spaceErrorMessage = '';
         }
     },
     extraReducers: (builder) => {
         builder
             .addCase(fetchSpaceSideBarData.pending, (state) => {
-                state.isLoading = true;
-                state.isError = false;
+                state.isSpaceLoading = true;
+                state.isSpaceError = false;
             })
             .addCase(fetchSpaceSideBarData.fulfilled, (state, action) => {
                 console.log(action.payload);
-                state.isLoading = false;
+                state.isSpaceLoading = false;
                 state.spaceSideBarData = action.payload;
             })
             .addCase(fetchSpaceSideBarData.rejected, (state,action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.errorMessage = action.payload.error;
+                state.isSpaceLoading = false;
+                state.isSpaceError = true;
+                state.spaceErrorMessage = action.payload.error;
             })
             .addCase(fetchSubspaceSideDrawer.pending, (state,action) => {
                 state.isSubspaceLoading = true;
-                state.isError = false;
+                state.isSpaceError = false;
             })
             .addCase(fetchSubspaceSideDrawer.fulfilled, (state,action) => {
                 console.log(action)
                 state.isSubspaceLoading = false;
-                state.isError = false
-                state.errorMessage = '';
+                state.isSpaceError = false
+                state.spaceErrorMessage = '';
                 if (!state.subspaceSideDrawerData) {
                     state.subspaceSideDrawerData = {};
                 }
@@ -110,17 +110,17 @@ const spaceSlice = createSlice({
             })
             .addCase(fetchSubspaceSideDrawer.rejected, (state,action) => {
                 state.isSubspaceLoading = false;
-                state.isError = true;
-                state.errorMessage = action.payload.error;
+                state.isSpaceError = true;
+                state.spaceErrorMessage = action.payload.error;
             })
             .addCase(fetchSpaceDetails.pending, (state,action) => {
-                state.isLoading = true;
-                state.isError = false;
+                state.isSpaceLoading = true;
+                state.isSpaceError = false;
             })
             .addCase(fetchSpaceDetails.fulfilled, (state,action) => {
-                state.isLoading = false;
-                state.isError = false;
-                state.errorMessage = '';
+                state.isSpaceLoading = false;
+                state.isSpaceError = false;
+                state.spaceErrorMessage = '';
                 if (!state.spaceDetails) {
                     state.spaceDetails = {};
                 }
@@ -130,18 +130,18 @@ const spaceSlice = createSlice({
                 };
             })
             .addCase(fetchSpaceDetails.rejected, (state,action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.errorMessage = action.payload.error;
+                state.isSpaceLoading = false;
+                state.isSpaceError = true;
+                state.spaceErrorMessage = action.payload.error;
             })
             .addCase(fetchAssignmentList.pending, (state) => {
                 state.isAssignmentLoading = true;
-                state.isError = false;
+                state.isSpaceError = false;
             })
             .addCase(fetchAssignmentList.fulfilled, (state, action) => {
                 state.isAssignmentLoading = false;
-                state.isError = false;
-                state.errorMessage = '';
+                state.isSpaceError = false;
+                state.spaceErrorMessage = '';
                 if (!state.assignmentList) {
                     state.assignmentList = {};
                 }
@@ -152,12 +152,12 @@ const spaceSlice = createSlice({
             })
             .addCase(fetchAssignmentList.rejected, (state, action) => {
                 state.isAssignmentLoading = false;
-                state.isError = true;
-                state.errorMessage = action.payload.error;
+                state.isSpaceError = true;
+                state.spaceErrorMessage = action.payload.error;
             })
     }
 })
 
-export const { clearErrorMessage } = spaceSlice.actions
+export const { clearSpaceErrorMessage } = spaceSlice.actions
 
 export default spaceSlice.reducer

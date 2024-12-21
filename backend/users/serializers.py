@@ -65,7 +65,7 @@ class RestrictedUserProfileSerializer(serializers.ModelSerializer):
         ]
 
 class UserSerializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(write_only = True)
+    confirmPassword = serializers.CharField(write_only = True)
     password = serializers.CharField(write_only = True)
     id = serializers.IntegerField(read_only = True)
     class Meta:
@@ -77,7 +77,7 @@ class UserSerializer(serializers.ModelSerializer):
             'username',
             'email',
             'password',
-            'password2',
+            'confirmPassword',
         ]
     def validate_username(self,value):
         if User.objects.filter(username = value).exists():
@@ -90,12 +90,12 @@ class UserSerializer(serializers.ModelSerializer):
         return value
     
     def validate(self,validated_data):
-        if validated_data['password'] !=validated_data['password2']:
+        if validated_data['password'] !=validated_data['confirmPassword']:
             raise serializers.ValidationError("The passwords doesn't match. Please retry.")
         return validated_data
     
     def create(self, validated_data):
-        validated_data.pop('password2')
+        validated_data.pop('confirmPassword')
         user = User(
             username = validated_data['username'],
             email = validated_data['email'],

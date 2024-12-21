@@ -1,37 +1,21 @@
-import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import React, { useState } from 'react'
+import { useSelector} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { fetchSpaceSideBarData } from '../../features/space/spaceSlice'
-import { use } from 'react'
 
 const SpaceSideBar = () => {
-    const dispatch = useDispatch()
     const navigate = useNavigate()
-    const { spaceSideBarData, isLoading, isError } = useSelector(state => state.space)
+    const { spaceSideBarData, } = useSelector(state => state.space)
     const [hoverIndex, setHoverIndex] = useState(null)
     const [clickIndex, setClickIndex] = useState(null)
-    const dummyData = ['https://robohash.org/10.37.201.177.png', 'https://robohash.org/1037.201.177.png', 'https://robohash.org/103.201.177.png', 'https://robohash.org/103.37.201.png']
-
-    useEffect(() => {
-        const getSpaceSidebarData = async () => {
-            try {
-                const username = localStorage.getItem('username')
-                await dispatch(fetchSpaceSideBarData(username)).unwrap()
-            } catch (error) {
-                console.error('Error fetching space sidebar data:', error)
-            }
-        }
-        if (spaceSideBarData === null)
-            getSpaceSidebarData()
-    }, [dispatch])
 
     const handleClick = (spaceId) => {
         setClickIndex(spaceId)
         if (spaceId === Infinity) navigate('/dashboard')
         else navigate(`spaces/${spaceId}`)
     }
+    console.log('in SpaceSideBar')
+    // console.log(spaceSideBarData)
 
-    if (isLoading && spaceSideBarData === null) return <div>Loading...</div>
     return (
         <div className='inline-flex flex-col bg-backg_dark h-screen text-white overflow-auto [&::-webkit-scrollbar]:hidden'>
             <ul className='inline-flex flex-col gap-4 pt-2'>
