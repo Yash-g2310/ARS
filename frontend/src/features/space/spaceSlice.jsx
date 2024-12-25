@@ -45,13 +45,26 @@ export const fetchSpaceDetails = createAsyncThunk('space/fetchSpaceDetails', asy
     }
 })
 
-export const fetchAssignmentList = createAsyncThunk('space/fetchAssignmentList', async ({ username, spaceId, subspaceId }, { rejectWithValue, }) => {
+export const fetchAssignmentList = createAsyncThunk('space/fetchAssignmentList', async ({ username, spaceId, subSpaceId }, { rejectWithValue, }) => {
     console.log('inside actual defn of fetchAssignmentList');
     try {
-        const response = await assignmentAPI.getAssignmentList(username, spaceId, subspaceId);
+        const response = await assignmentAPI.getAssignmentList(username, spaceId, subSpaceId);
         console.log(response.data);
         return {
-            subspaceId: subspaceId,
+            subSpaceId: subSpaceId,
+            data: response.data
+        };
+    } catch (error) {
+        return rejectWithValue(error.response.data);
+    }
+})
+
+export const fetchSubSpaceDetails = createAsyncThunk('space/fetchSubSpaceDetails', async ({ username, spaceId, subSpaceId }, { rejectWithValue, }) => { 
+    try {
+        const response = await spaceAPI.getSubSpaceDetails(username, spaceId, subSpaceId);
+        console.log(response.data);
+        return {
+            subSpaceId: subSpaceId,
             data: response.data
         };
     } catch (error) {
@@ -61,14 +74,19 @@ export const fetchAssignmentList = createAsyncThunk('space/fetchAssignmentList',
 
 const initialState = {
     isSpaceLoading: false,
-    isSubspaceLoading: false,
+    isSubSpaceLoading: false,
     isAssignmentLoading: false,
     isSpaceError: false,
     spaceErrorMessage: '',
+    isSubSpaceError: false,
+    subSpaceErrorMessage: '',
+    isAssignmentError: false,
+    assignmentErrorMessage: '',
     spaceSideBarData: null,
     subspaceSideDrawerData: {},
     spaceDetails: {},
     assignmentList: {},
+    subSpaceDetails: {},
 
 }
 
@@ -100,7 +118,7 @@ const spaceSlice = createSlice({
                 state.isSpaceLoading = false;
             })
             .addCase(fetchSubspaceSideDrawer.pending, (state, action) => {
-                state.isSubspaceLoading = true;
+                state.isSubSpaceLoading = true;
                 state.isSpaceError = false;
             })
             .addCase(fetchSubspaceSideDrawer.fulfilled, (state, action) => {
@@ -114,12 +132,12 @@ const spaceSlice = createSlice({
                 };
                 state.isSpaceError = false
                 state.spaceErrorMessage = '';
-                state.isSubspaceLoading = false;
+                state.isSubSpaceLoading = false;
             })
             .addCase(fetchSubspaceSideDrawer.rejected, (state, action) => {
                 state.isSpaceError = true;
                 state.spaceErrorMessage = action.payload.error;
-                state.isSubspaceLoading = false;
+                state.isSubSpaceLoading = false;
             })
             .addCase(fetchSpaceDetails.pending, (state, action) => {
                 state.isSpaceLoading = true;
@@ -144,7 +162,7 @@ const spaceSlice = createSlice({
             })
             .addCase(fetchAssignmentList.pending, (state) => {
                 state.isAssignmentLoading = true;
-                state.isSpaceError = false;
+                state.isAssignmentError = false;
             })
             .addCase(fetchAssignmentList.fulfilled, (state, action) => {
                 if (!state.assignmentList) {
@@ -152,16 +170,37 @@ const spaceSlice = createSlice({
                 }
                 state.assignmentList = {
                     ...state.assignmentList,
-                    [action.payload.subspaceId]: action.payload.data
+                    [action.payload.subSpaceId]: action.payload.data
                 };
-                state.isSpaceError = false;
-                state.spaceErrorMessage = '';
+                state.isAssignmentError = false;
+                state.assignmentErrorMessage = '';
                 state.isAssignmentLoading = false;
             })
             .addCase(fetchAssignmentList.rejected, (state, action) => {
-                state.isSpaceError = true;
-                state.spaceErrorMessage = action.payload.error;
+                state.isAssignmentError = true;
+                state.assignmentErrorMessage = action.payload.error;
                 state.isAssignmentLoading = false;
+            })
+            .addCase(fetchSubSpaceDetails.pending, (state) => {
+                state.isSubSpaceLoading = true;
+                state.isSubSpaceError = false;
+            })
+            .addCase(fetchSubSpaceDetails.fulfilled, (state, action) => {
+                if (!state.subSpaceDetails) {
+                    state.subSpaceDetails = {};
+                }
+                state.subSpaceDetails = {
+                    ...state.subSpaceDetails,
+                    [action.payload.subSpaceId]: action.payload.data
+                };
+                state.isSubSpaceError = false;
+                state.subSpaceErrorMessage = '';
+                state.isSubSpaceLoading = false;
+            })
+            .addCase(fetchSubSpaceDetails.rejected, (state, action) => {
+                state.isSubSpaceError = true;
+                state.subSpaceErrorMessage = action.payload.error;
+                state.isSubSpaceLoading = false;
             })
     }
 })

@@ -302,6 +302,7 @@ class AssignmentListSerializer(serializers.ModelSerializer):
             'assignment_id',
             'title',
             'upload_date',
+            'due_date',
             'subtask_count',
             'reviewer_count',
             'reviewee_count',

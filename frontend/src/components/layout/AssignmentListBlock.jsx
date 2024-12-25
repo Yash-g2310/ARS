@@ -2,22 +2,22 @@ import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchAssignmentList } from '../../features/space/spaceSlice'
 
-const AssignmentListBlock = ({ subspaceId, spaceId }) => {
+const AssignmentListBlock = ({ subSpaceId, spaceId }) => {
     const dispatch = useDispatch();
     const {
         assignmentList,
         isAssignmentLoading,
-        isError,
-        errorMessage
+        isAssignmentError,
+        assignmentErrorMessage,
     } = useSelector(state => state.space);
 
     useEffect(() => {
         const fetchAssignments = async () => {
-            if (subspaceId && spaceId && !assignmentList?.[subspaceId]) {
+            if (subSpaceId && spaceId && !assignmentList?.[subSpaceId]) {
                 console.log('calling fetching assignments')
                 try {
                     const username = localStorage.getItem('username');
-                    await dispatch(fetchAssignmentList({ username, spaceId, subspaceId })).unwrap();
+                    await dispatch(fetchAssignmentList({ username, spaceId, subSpaceId })).unwrap();
                 } catch (error) {
                     console.error('Error fetching assignments:', error);
                 }
@@ -25,16 +25,16 @@ const AssignmentListBlock = ({ subspaceId, spaceId }) => {
         };
 
         fetchAssignments();
-    }, [dispatch, subspaceId, spaceId, assignmentList]);
+    }, [dispatch, subSpaceId, spaceId, assignmentList]);
 
-    const currentAssignmentsList = assignmentList?.[subspaceId] || [];
+    const currentAssignmentsList = assignmentList?.[subSpaceId] || [];
     if (isAssignmentLoading) return (<div>Loading... </div>)
-    if (isError) return (<div>{errorMessage}</div>)
+    if (isAssignmentError) return (<div>{assignmentErrorMessage}</div>)
 
     return (
         <div className="pl-2 py-2 space-y-1.5">
             {currentAssignmentsList?.map((assignment) => (
-                <div
+                <button
                     key={assignment.assignment_id}
                     className="flex items-center gap-2 p-1 rounded-md bg-[#4E5058]/30 hover:bg-[#4E5058]/50 text-sm text-light_gray hover:text-light_white transition-colors duration-200 "
                 >
@@ -46,7 +46,7 @@ const AssignmentListBlock = ({ subspaceId, spaceId }) => {
                     <button className="truncate max-w-[calc(100%-2rem)] flex-1" title={assignment.title}>
                         {assignment.title}
                     </button>
-                </div>
+                </button>
             ))}
         </div>
     );

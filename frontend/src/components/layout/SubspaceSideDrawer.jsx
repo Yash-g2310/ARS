@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import AssignmentListBlock from './AssignmentListBlock';
+import DropdownMenu, { MenuItem } from '../common/DropDownMenu';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setComponentState }) => {
   console.log('in SubspaceSideDrawer')
+  const [activeMenu, setActiveMenu] = useState(null);
+  const menuButtonRefs = useRef({});
+
   const { spaceId } = useParams();
   const navigate = useNavigate();
   console.log(subspaces)
@@ -23,6 +28,11 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
       ...componentState,
       showSpaceDetails: !componentState.showSpaceDetails
     });
+  }
+
+  const handleSubspaceDetails = (subSpaceId) => {
+    console.log(subSpaceId)
+    navigate(`/spaces/${spaceId}/subspaces/${subSpaceId}/details`);
   }
 
 
@@ -85,22 +95,38 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
                   </div>
                 </button>
 
+                {/* new code */}
                 <button
+                  ref={(el) => menuButtonRefs.current[subspace.id] = el}
                   className="p-1 hover:bg-[#4E5058] rounded-full transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
+                    setActiveMenu(activeMenu === subspace.id ? null : subspace.id);
                   }}
                 >
                   <svg className="w-5 h-5 text-light_gray hover:text-light_white" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                   </svg>
+                  {console.log(subspace)}
+                  <DropdownMenu
+                    open={activeMenu === subspace.id}
+                    anchorEl={menuButtonRefs.current[subspace.id]}
+                    onClose={() => setActiveMenu(null)}
+                  >
+                    <MenuItem
+                      icon={<InfoOutlinedIcon className="text-light_gray" />}
+                      onClick={() => handleSubspaceDetails(subspace.id)}
+                    >
+                      View Details
+                    </MenuItem>
+                  </DropdownMenu>
                 </button>
               </div>
 
               {expandedSubspace === subspace.id &&
                 <div className={`overflow-hidden transition-all duration-300 ${expandedSubspace === subspace.id ? 'max-h-96' : 'max-h-0'
                   }`}>
-                  <AssignmentListBlock spaceId={spaceDetail.id} subspaceId={subspace.id} />
+                  <AssignmentListBlock spaceId={spaceDetail.id} subSpaceId={subspace.id} />
                 </div>}
             </div>
           ))

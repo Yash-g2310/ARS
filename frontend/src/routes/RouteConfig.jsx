@@ -8,6 +8,8 @@ import PrivateRoute from "./PrivateRoute";
 import ChanneliCallback from "../components/loginSignUp/ChanneliCallback";
 import SpaceLayout from "../components/layout/SpaceLayout";
 import SpaceDetailComponent from "../components/layout/SpaceDetailComponent";
+import SpaceNotActive from "../components/layout/SpaceNotActive";
+import SubSpaceDetailComponent from "../components/layout/SubSpaceDetailComponent";
 
 const routes = [
     {
@@ -56,7 +58,7 @@ const routes = [
                         path: '',
                         element: (
                             // <PrivateRoute>
-                                <NotActive />
+                                <SpaceNotActive/>
                             // </PrivateRoute>
                         )
                     },
@@ -67,8 +69,25 @@ const routes = [
                                 <SpaceDetailComponent />
                             // </PrivateRoute>
                         )
+                    },
+                    {
+                        path: 'subspaces/:subSpaceId',
+                        // element: (
+                        //     // <PrivateRoute>
+                        //     <SpaceNotActive/>
+                        //     // </PrivateRoute>
+                        // ),
+                        children: [ 
+                            {
+                                path: 'details',
+                                element: (
+                                    // <PrivateRoute>
+                                        <SubSpaceDetailComponent/>
+                                    // </PrivateRoute>
+                                )
+                            }
+                        ]
                     }
-
                 ]
             }
         ]

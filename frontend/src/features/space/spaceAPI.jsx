@@ -29,9 +29,9 @@ export const spaceAPI = {
     // subspaces
     createSubspace: (username, spaceId, subspaceData) => axiosInstance.post(`/${username}/${spaceId}/create-subspace/`, subspaceData),
 
-    getSubspaceDetails: (username, spaceId, subspaceId) => axiosInstance.get(`/${username}/${spaceId}/${subspaceId}/details/`),
+    getSubSpaceDetails: (username, spaceId, subSpaceId) => axiosInstance.get(`/${username}/${spaceId}/${subSpaceId}/details/`),
     
-    getSubspaceMembers: (username, spaceId, subspaceId) => axiosInstance.get(`/${username}/${spaceId}/${subspaceId}/members/`),
+    getSubspaceMembers: (username, spaceId, subSpaceId) => axiosInstance.get(`/${username}/${spaceId}/${subSpaceId}/members/`),
 
 
 
