@@ -14,6 +14,7 @@ import AssignmentLayout from "../components/layout/AssignmentLayout";
 import AssignmentDetailComponent from "../components/layout/AssignmentDetailComponent";
 import AssignmentMembers from "../components/layout/AssignmentMembers";
 import AssignmentEditComponent from "../components/layout/AssignmentEditComponent";
+import AssignmentCreate from "../components/layout/AssignmentCreate";
 
 const routes = [
     {
@@ -89,6 +90,10 @@ const routes = [
                                         <SubSpaceDetailComponent/>
                                     // </PrivateRoute>
                                 )
+                            },
+                            {
+                                path: 'create-assignment',
+                                element: <AssignmentCreate/>
                             },
                             {
                                 path: 'assignments/:assignmentId',

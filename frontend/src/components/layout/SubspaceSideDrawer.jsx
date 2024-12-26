@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import AssignmentListBlock from './AssignmentListBlock';
 import DropdownMenu, { MenuItem } from '../common/DropDownMenu';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import AddIcon from '@mui/icons-material/Add';
+import AssignmentListBlock from './AssignmentListBlock';
 
 const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setComponentState }) => {
   console.log('in SubspaceSideDrawer')
@@ -35,6 +36,10 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
     navigate(`/spaces/${spaceId}/subspaces/${subSpaceId}/details`);
   }
 
+  const handleCreateAssignment = (subSpaceId) => {
+    console.log(subSpaceId)
+    navigate(`/spaces/${spaceId}/subspaces/${subSpaceId}/create-assignment`);
+  }
 
   return (
     <div className='text-light_white flex flex-col gap-3 pt-4'>
@@ -69,18 +74,14 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
         {subspaces && subspaces.length > 0 ? (
           subspaces.map((subspace) => (
             subspace.is_member &&
-            <div key={subspace.id} className="flex flex-col">
-              <div className="flex items-center justify-between 
-                    bg-[#4E5058]/50 hover:bg-[#4E5058]/70 
-                    p-2.5 rounded-md
-                    transition-all duration-200 ease-in-out 
-                    border border-gray-600/30 hover:border-gray-500/50">
+            <div key={subspace.id} className="flex flex-col w-full">
+              <div className="w-full  flex items-center justify-between  bg-[#4E5058]/50 hover:bg-[#4E5058]/70 p-2.5 rounded-md transition-all duration-200 ease-in-out  border border-gray-600/30 hover:border-gray-500/50">
                 <button
                   onClick={() => { handleAssignmentClick(subspace) }}
-                  className='flex-1 text-left text-light_white/90 hover:text-light_white 
+                  className='flex-1 grow max-w-[calc(85%)] text-left text-light_white/90 hover:text-light_white 
                     focus:outline-none'
                 >
-                  <div className="flex items-center gap-2 max-w-32 overflow-hidden">
+                  <div className="flex items-center gap-2 w-full overflow-hidden">
                     <svg
                       className={`w-4 h-4 flex-shrink-0 transform transition-transform ${expandedSubspace === subspace.id ? 'rotate-90' : ''
                         }`}
@@ -98,7 +99,7 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
                 {/* new code */}
                 <button
                   ref={(el) => menuButtonRefs.current[subspace.id] = el}
-                  className="p-1 hover:bg-[#4E5058] rounded-full transition-colors"
+                  className="p-1 hover:bg-[#4E5058] rounded-full transition-colors duration-200"
                   onClick={(e) => {
                     e.stopPropagation();
                     setActiveMenu(activeMenu === subspace.id ? null : subspace.id);
@@ -118,6 +119,12 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
                       onClick={() => handleSubspaceDetails(subspace.id)}
                     >
                       View Details
+                    </MenuItem>
+                    <MenuItem
+                      icon={<AddIcon className="text-light_gray" />}
+                      onClick={() => handleCreateAssignment(subspace.id)}
+                    >
+                      Create Assignment
                     </MenuItem>
                   </DropdownMenu>
                 </button>
