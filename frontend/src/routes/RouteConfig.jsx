@@ -10,6 +10,8 @@ import SpaceLayout from "../components/layout/SpaceLayout";
 import SpaceDetailComponent from "../components/layout/SpaceDetailComponent";
 import SpaceNotActive from "../components/layout/SpaceNotActive";
 import SubSpaceDetailComponent from "../components/layout/SubSpaceDetailComponent";
+import AssignmentLayout from "../components/layout/AssignmentLayout";
+import AssignmentDetailComponent from "../components/layout/AssignmentDetailComponent";
 
 const routes = [
     {
@@ -85,6 +87,16 @@ const routes = [
                                         <SubSpaceDetailComponent/>
                                     // </PrivateRoute>
                                 )
+                            },
+                            {
+                                path: 'assignments/:assignmentId',
+                                element: <AssignmentLayout/>,
+                                children: [
+                                    {
+                                        path: 'details',
+                                        element: <AssignmentDetailComponent/>
+                                    }
+                                ]
                             }
                         ]
                     }

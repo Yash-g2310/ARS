@@ -5,6 +5,8 @@ export const assignmentAPI = {
     getAssignmentList : (username,spaceId,subSpaceId) => axiosInstance.get(`/${username}/${spaceId}/${subSpaceId}/`),
 
     // create assignment
+    createAssignment : (username,spaceId,subSpaceId) => axiosInstance.get(`/${username}/${spaceId}/${subSpaceId}/create-assignment/`),
 
-    createAssignment : (username,spaceId,subSpaceId) => axiosInstance.get(`/${username}/${spaceId}/${subSpaceId}/create-assignment/`)
+    // assignment details
+    getAssignmentDetails : (username,spaceId,subSpaceId,assignmentId) => axiosInstance.get(`/${username}/${spaceId}/${subSpaceId}/${assignmentId}/details/`),
 }

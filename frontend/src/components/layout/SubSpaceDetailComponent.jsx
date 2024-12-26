@@ -88,81 +88,79 @@ const SubSpaceDetailComponent = () => {
                                 <h2><span className='text-[#FAA61A] '>Sub Space Name:  </span> {subSpaceDetail?.sub_space_name}</h2>
                             </div>
 
-                            <div className='felx flex-col gap-8'>
-                                <div className='text-white bg-backg_1 mx-3 my-2 px-3 pt-2 rounded-md'>
-                                    <h3 className='tracking-wider text-light_white bg-[#252428] px-2 rounded-md py-1'>Details</h3>
-                                    <div className='px-4 flex flex-row justify-between items-center '>
-                                        <div className='my-2 min-w-[calc(100%/2)]'>
-                                            <h3 className='text-light_gray text-left text-sm/4 tracking-wide'>Description</h3>
-                                            <p className='text-light_white text-left  text-sm/2 tracking-wide font-light'>{subSpaceDetail?.sub_space_bio}</p>
-                                        </div>
-                                        <div className='bg-[#202225] p-2 rounded-md m-2 min-w-[calc(100%/2)] px-4'>
-                                            <div className='flex flex-col justify-between items-start'>
-                                                <div className='my-2'>
-                                                    <h3 className='text-[#FAA61A] text-left font-sans'>Created By</h3>
-                                                    <div className='flex flex-row gap-2 items-center'>
-                                                        {spaceDetail?.owner_profile_pic === '' ? (
-                                                            <div className='w-8 h-8 bg-button_purple rounded-full flex items-center justify-center'>
-                                                                {spaceDetail?.owner_username.charAt(0).toUpperCase()}
-                                                            </div>) : (
-                                                            <img src={`${import.meta.env.VITE_API_BASE_URL}/${spaceDetail?.owner_profile_pic}`} alt="profile-image" className='w-8 h-8 rounded-full' />
-                                                        )
-                                                        }
-                                                        <p className='text-light_white text-left font-light'>{spaceDetail?.owner_username}</p>
-                                                    </div>
+                            <div className='text-white bg-backg_1 mx-3 my-2 px-3 pt-2 rounded-md'>
+                                <h3 className='tracking-wider text-light_white bg-[#252428] px-2 rounded-md py-1'>Details</h3>
+                                <div className='px-4 flex flex-row justify-between items-center '>
+                                    <div className='my-2 min-w-[calc(100%/2)]'>
+                                        <h3 className='text-light_gray text-left text-sm/4 tracking-wide'>Description</h3>
+                                        <p className='text-light_white text-left  text-sm/2 tracking-wide font-light'>{subSpaceDetail?.sub_space_bio}</p>
+                                    </div>
+                                    <div className='bg-[#202225] p-2 rounded-md m-2 min-w-[calc(100%/2)] px-4'>
+                                        <div className='flex flex-col justify-between items-start'>
+                                            <div className='my-2'>
+                                                <h3 className='text-[#FAA61A] text-left font-sans'>Created By</h3>
+                                                <div className='flex flex-row gap-2 items-center'>
+                                                    {spaceDetail?.owner_profile_pic === '' ? (
+                                                        <div className='w-8 h-8 bg-button_purple rounded-full flex items-center justify-center'>
+                                                            {spaceDetail?.owner_username.charAt(0).toUpperCase()}
+                                                        </div>) : (
+                                                        <img src={`${import.meta.env.VITE_API_BASE_URL}/${spaceDetail?.owner_profile_pic}`} alt="profile-image" className='w-8 h-8 rounded-full' />
+                                                    )
+                                                    }
+                                                    <p className='text-light_white text-left font-light'>{spaceDetail?.owner_username}</p>
                                                 </div>
-                                                <div className='my-2'>
-                                                    <h3 className='text-[#FAA61A] text-left font-sans'>Details</h3>
-                                                    <div className='flex flex-row gap-2 '>
-                                                        <p className='text-light_white text-left font-light'>creation date: </p>
-                                                        <p className='text-light_white text-left font-light'>{new Date(subSpaceDetail?.create_date).toLocaleDateString()}</p>
-                                                    </div>
-                                                    <div className='flex flex-row gap-2'>
-                                                        <p className='text-light_white text-left font-light'>reviewer count: </p>
-                                                        <p className='text-light_white text-left font-light'>{subSpaceDetail.reviewer_count}</p>
-                                                    </div>
-                                                    <div className='flex flex-row gap-2'>
-                                                        <p className='text-light_white text-left font-light'>reviewee count: </p>
-                                                        <p className='text-light_white text-left font-light'>{subSpaceDetail.reviewee_count}</p>
-                                                    </div>
+                                            </div>
+                                            <div className='my-2'>
+                                                <h3 className='text-[#FAA61A] text-left font-sans'>Details</h3>
+                                                <div className='flex flex-row gap-2 '>
+                                                    <p className='text-light_white text-left font-light'>creation date: </p>
+                                                    <p className='text-light_white text-left font-light'>{new Date(subSpaceDetail?.create_date).toLocaleDateString()}</p>
+                                                </div>
+                                                <div className='flex flex-row gap-2'>
+                                                    <p className='text-light_white text-left font-light'>reviewer count: </p>
+                                                    <p className='text-light_white text-left font-light'>{subSpaceDetail.reviewer_count}</p>
+                                                </div>
+                                                <div className='flex flex-row gap-2'>
+                                                    <p className='text-light_white text-left font-light'>reviewee count: </p>
+                                                    <p className='text-light_white text-left font-light'>{subSpaceDetail.reviewee_count}</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className='text-white bg-backg_1 mx-3 my-2 px-3 py-2 rounded-md '>
-                                    <div className='flex justify-between items-center mb-4 '>
-                                        <h3 className='tracking-wider text-light_white bg-[#252428] px-2 rounded-md w-full py-1'>Reviewers ({subSpaceDetail.reviewer_count})</h3>
-                                    </div>
-                                    <div className='px-4 grid grid-cols-2 gap-4 max-h-52 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-                                        {subSpaceDetail.reviewers_list?.map((reviewer) => (
-                                            <div key={reviewer.space_member_id}
-                                                className='flex items-center gap-3 p-2 rounded-md bg-[#202225] hover:bg-[#2f3136] transition-colors'>
-                                                <div className='w-8 h-8 bg-button_purple rounded-full flex items-center justify-center'>
-                                                    {reviewer.username.charAt(0).toUpperCase()}
-                                                </div>
-                                                <span className='text-light_white text-sm'>{reviewer.username}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                            <div className='text-white bg-backg_1 mx-3 my-2 px-3 py-2 rounded-md '>
+                                <div className='flex justify-between items-center mb-4 '>
+                                    <h3 className='tracking-wider text-light_white bg-[#252428] px-2 rounded-md w-full py-1'>Reviewers ({subSpaceDetail.reviewer_count})</h3>
                                 </div>
-
-                                <div className='text-white bg-backg_1 mx-3 my-2 px-3 py-2 rounded-md'>
-                                    <div className='flex justify-between items-center mb-4'>
-                                        <h3 className='tracking-wider text-light_white bg-[#252428] px-2 rounded-md w-full py-1'>Reviewees ({subSpaceDetail.reviewee_count})</h3>
-                                    </div>
-                                    <div className='px-4 grid grid-cols-2 gap-4 max-h-52 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
-                                        {subSpaceDetail.reviewees_list?.map((reviewee) => (
-                                            <div key={reviewee.space_member_id}
-                                                className='flex items-center gap-3 p-2 rounded-md bg-[#202225] hover:bg-[#2f3136] transition-colors'>
-                                                <div className='w-8 h-8 bg-button_purple rounded-full flex items-center justify-center'>
-                                                    {reviewee.username.charAt(0).toUpperCase()}
-                                                </div>
-                                                <span className='text-light_white text-sm'>{reviewee.username}</span>
+                                <div className='px-4 grid grid-cols-2 gap-4 max-h-52 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+                                    {subSpaceDetail.reviewers_list?.map((reviewer) => (
+                                        <div key={reviewer.space_member_id}
+                                            className='flex items-center gap-3 p-2 rounded-md bg-[#202225] hover:bg-[#2f3136] transition-colors'>
+                                            <div className='w-8 h-8 bg-button_purple rounded-full flex items-center justify-center'>
+                                                {reviewer.username.charAt(0).toUpperCase()}
                                             </div>
-                                        ))}
-                                    </div>
+                                            <span className='text-light_white text-sm'>{reviewer.username}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className='text-white bg-backg_1 mx-3 my-2 px-3 py-2 rounded-md'>
+                                <div className='flex justify-between items-center mb-4'>
+                                    <h3 className='tracking-wider text-light_white bg-[#252428] px-2 rounded-md w-full py-1'>Reviewees ({subSpaceDetail.reviewee_count})</h3>
+                                </div>
+                                <div className='px-4 grid grid-cols-2 gap-4 max-h-52 overflow-y-auto [&::-webkit-scrollbar]:hidden'>
+                                    {subSpaceDetail.reviewees_list?.map((reviewee) => (
+                                        <div key={reviewee.space_member_id}
+                                            className='flex items-center gap-3 p-2 rounded-md bg-[#202225] hover:bg-[#2f3136] transition-colors'>
+                                            <div className='w-8 h-8 bg-button_purple rounded-full flex items-center justify-center'>
+                                                {reviewee.username.charAt(0).toUpperCase()}
+                                            </div>
+                                            <span className='text-light_white text-sm'>{reviewee.username}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -195,7 +193,7 @@ const SubSpaceDetailComponent = () => {
                                                 <span className='text-orange-400'>Upload Date: </span> {new Date(assignment.upload_date).toLocaleDateString()}
                                             </div>
                                             <div className='text-light_gray text-xs'>
-                                            <span className='text-orange-400'>Role: </span> {assignment.role}
+                                                <span className='text-orange-400'>Role: </span> {assignment.role}
                                             </div>
                                         </div>
                                     </div>

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from submissions.models import AssignmentReviewee,AssignmentSubmission,AssignmentTeam,SubtaskStatus,SubtaskSubmission,AssignmentSubtask
-from assignments.models import Assignment
+from assignments.models import Assignment,TeamMember
 from django.db import transaction
 from attachments.serializers import Attachment,AttachmentSerializer
 
@@ -11,10 +11,18 @@ class AssignmentRevieweeStatusSerializer(serializers.ModelSerializer):
         model = AssignmentReviewee
         fields = ['assignment_reviewee','reviewee_status']
         
+class TeamMemberStatusSerializer(serializers.ModelSerializer):
+    member_name = serializers.CharField(source='member.space_member.user.username', read_only=True)
+    
+    class Meta:
+        model = TeamMember
+        fields = ['member_name']
+        
 class AssignmentTeamStatusSerializer(serializers.ModelSerializer):
+    team_members = TeamMemberStatusSerializer(source='teammember_set', many=True, read_only=True)
     class Meta:
         model = AssignmentTeam
-        fields = ['team_name','team_status']
+        fields = ['team_name','team_status','team_members']
 
 class AssignmentStatusSerializer(serializers.ModelSerializer):
     reviewees_status = serializers.SerializerMethodField()

@@ -154,10 +154,15 @@ class SpaceMemberSerializer(serializers.ModelSerializer):
 class SubSpaceMemberSerializer(serializers.ModelSerializer):
     space_member_id = serializers.PrimaryKeyRelatedField(queryset = SpaceMember.objects.all())
     username = serializers.CharField(source='space_member.user.username', read_only=True)
+    profile_photo = serializers.SerializerMethodField()
     class Meta:
         model = SubSpaceMember
-        fields = ['id','space_member_id','username','join_date','role',]
-    
+        fields = ['id','space_member_id','username','join_date','role','profile_photo']
+    def get_profile_photo(self,obj):
+        if obj.space_member.user.userprofile.profile_image:
+            return obj.space_member.user.userprofile.profile_image.url
+        else:
+            return ''  
 
 class SubSpaceCreateSerializer(serializers.ModelSerializer):
     reviewers = serializers.PrimaryKeyRelatedField(many=True, queryset=SpaceMember.objects.all(), write_only=True)

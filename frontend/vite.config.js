@@ -11,6 +11,10 @@ export default defineConfig({
         changeOrigin: true,
         credentials: "include",
       },
+      '/static': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
     },
   },
 });

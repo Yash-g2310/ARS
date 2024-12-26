@@ -330,6 +330,8 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
     reviewees_list = serializers.SerializerMethodField(read_only = True)
     teams_list = serializers.SerializerMethodField(read_only = True)
     attachment_list = serializers.SerializerMethodField(read_only = True)
+    uploader = SubSpaceMemberSerializer(read_only = True)
+    current_user_role = serializers.SerializerMethodField(read_only = True)
     
     class Meta(AssignmentCreateSerializer.Meta):
         model = Assignment
@@ -343,12 +345,25 @@ class AssignmentRetrieveUpdateSerializer(AssignmentCreateSerializer):
             'reviewees_list',
             'teams_list',
             'attachment_list',
+            'current_user_role',
         ]
         
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.instance is not None:
-            self.fields.pop('uploader',None)
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     if self.instance is not None:
+    #         self.fields.pop('uploader',None)
+    
+    def get_current_user_role(self,obj):
+        sub_space_member = SubSpaceMember.objects.filter(sub_space = obj.sub_space, space_member__user = self.context['request'].user).first()
+        if not sub_space_member:
+            raise serializers.ValidationError("subspace member is not passed in context")
+        if AssignmentReviewee.objects.filter(assignment =obj,reviewee=sub_space_member).exists():
+            return SubSpaceMember.REVIEWEE
+        elif AssignmentReviewer.objects.filter(assignment =obj,reviewer=sub_space_member).exists():
+            return SubSpaceMember.REVIEWER
+        elif TeamMember.objects.filter(team__assignment= obj,member = sub_space_member).exists():
+            return 'team'
+        return "not part of this assignment"
     
     def get_subtask_list(self,obj):
         subtasks = obj.assignmentsubtask_set.all()
