@@ -12,6 +12,8 @@ import SpaceNotActive from "../components/layout/SpaceNotActive";
 import SubSpaceDetailComponent from "../components/layout/SubSpaceDetailComponent";
 import AssignmentLayout from "../components/layout/AssignmentLayout";
 import AssignmentDetailComponent from "../components/layout/AssignmentDetailComponent";
+import AssignmentMembers from "../components/layout/AssignmentMembers";
+import AssignmentEditComponent from "../components/layout/AssignmentEditComponent";
 
 const routes = [
     {
@@ -95,7 +97,19 @@ const routes = [
                                     {
                                         path: 'details',
                                         element: <AssignmentDetailComponent/>
-                                    }
+                                    },
+                                    {
+                                        path: 'members',
+                                        element: <AssignmentMembers/>
+                                    },
+                                    {
+                                        path: 'submissions',
+                                        element: <NotActive/>
+                                    },
+                                    {
+                                        path: 'edit',
+                                        element: <AssignmentEditComponent/>,
+                                    },
                                 ]
                             }
                         ]

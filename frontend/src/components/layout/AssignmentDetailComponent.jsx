@@ -32,7 +32,7 @@ const AssignmentDetailComponent = () => {
     }
 
     return (
-        <div className='flex flex-row h-[calc(100vh-2.5rem)] bg-backg_1 '>
+        <div className='flex flex-row h-[calc(100vh-3.5rem)] bg-backg_1 '>
             <div className='bg-backg_1 grow overflow-auto h-full border-r border-gray-500 border-r[50%] '>
                 <div className='bg-backg_1 flex flex-col p-2 w-lg h-full text-left overflow-auto'>
                     <div className='bg-gradient-to-r from-[#1A1B1E]/95 to-[#2D2F34]/95 backdrop-blur-md rounded-lg mx-3 my-2 p-[1px]'>

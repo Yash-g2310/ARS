@@ -9,4 +9,7 @@ export const assignmentAPI = {
 
     // assignment details
     getAssignmentDetails : (username,spaceId,subSpaceId,assignmentId) => axiosInstance.get(`/${username}/${spaceId}/${subSpaceId}/${assignmentId}/details/`),
+
+    // assignment members 
+    getAssignmentMembers : (username,spaceId,subSpaceId,assignmentId) => axiosInstance.get(`/${username}/${spaceId}/${subSpaceId}/${assignmentId}/members/`),
 }

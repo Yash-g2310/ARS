@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { use } from 'react'
-import { fetchAssignmentDetails, setActiveTab } from '../../features/assignment/assignmentSlice'
+import { fetchAssignmentDetails, setActiveTab,fetchAssignmentMembers } from '../../features/assignment/assignmentSlice'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchAssignmentStatus } from '../../features/submission/submissionSlice'
 import { Description, People, Assignment, Edit } from '@mui/icons-material';
@@ -13,15 +13,19 @@ const AssignmentLayout = () => {
     const { spaceId, subSpaceId, assignmentId } = useParams();
     const username = localStorage.getItem('username');
     const dispatch = useDispatch();
-    const { assignmentDetails, isAssignmentLoading, isAssignmentError, assignmentErrorMessage, activeTab } = useSelector(state => state.assignment);
+    const { assignmentDetails, isAssignmentLoading, isAssignmentError, assignmentErrorMessage, activeTab, assignmentMembers } = useSelector(state => state.assignment);
     const {assignmentStatus, isStatusLoading, isStatusError, statusErrorMessage} = useSelector(state => state.submission);
     const navigate = useNavigate();
     const location = useLocation();
+    useEffect(() => {
+        handleNavigation('details');
+    },[assignmentId])
 
     useEffect(() => {
         if (username && spaceId && subSpaceId && assignmentId) {
             fetchAssignmentDetailsData(username, spaceId, subSpaceId, assignmentId);
             fetchAssignmentStatusData(username, spaceId, subSpaceId, assignmentId);
+            fetchAssignmentMembersData(username, spaceId, subSpaceId, assignmentId);
         }
     }, [dispatch, username, spaceId, subSpaceId, assignmentId])
 
@@ -51,10 +55,23 @@ const AssignmentLayout = () => {
         }
     };
 
+    const fetchAssignmentMembersData = async (username, spaceId, subSpaceId, assignmentId,) => {
+        try {
+            if (spaceId && subSpaceId && assignmentId) {
+                const hasData = assignmentMembers && assignmentMembers[assignmentId];
+                if (username && spaceId && subSpaceId && assignmentId && !hasData) {
+                    await dispatch(fetchAssignmentMembers({ username, spaceId, subSpaceId, assignmentId })).unwrap();
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch space details:', error);
+        }
+    };
+
     const handleNavigation = (tab) => {
         dispatch(setActiveTab(tab));
         console.log(tab);
-        // navigate(`/${spaceId}/${subSpaceId}/${assignmentId}/${tab}`);
+        navigate(`/spaces/${spaceId}/subspaces/${subSpaceId}/assignments/${assignmentId}/${tab}`);
     };
 
     const buttonClass = (tab) => `
@@ -119,26 +136,26 @@ const AssignmentLayout = () => {
                         {assignmentDetail?.current_user_role === 'reviewer' && (
                             <>
                                 <button 
-                                    onClick={() => handleNavigation('submissions')}
-                                    className={buttonClass('submissions')}
-                                >
-                                    <Assignment fontSize="small" />
-                                    Submissions
-                                </button>
-
-                                <button 
                                     onClick={() => handleNavigation('edit')}
                                     className={buttonClass('edit')}
                                 >
                                     <Edit fontSize="small" />
                                     Edit
                                 </button>
+                                
+                                <button 
+                                    onClick={() => handleNavigation('submissions')}
+                                    className={buttonClass('submissions')}
+                                >
+                                    <Assignment fontSize="small" />
+                                    Submissions
+                                </button>
                             </>
                         )}
                     </div>
                 </div>
             </div>
-            <Outlet />
+                <Outlet />
         </div>
     )
 }

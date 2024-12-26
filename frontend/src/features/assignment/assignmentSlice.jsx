@@ -15,6 +15,19 @@ export const fetchAssignmentDetails = createAsyncThunk('assignment/fetchAssignme
     }
 })
 
+export const fetchAssignmentMembers = createAsyncThunk('assignment/fetchAssignmentMembers', async ({ username, spaceId, subSpaceId, assignmentId }, { rejectWithValue, }) => {
+    try {
+        const response = await assignmentAPI.getAssignmentMembers(username, spaceId, subSpaceId, assignmentId);
+        console.log(response.data);
+        return {
+            assignmentId: assignmentId,
+            data: response.data
+        };
+    } catch (error) {
+        return rejectWithValue(error.response.data);
+    }
+})
+
 
 const initialState = {
     isAssignmentLoading: false,
@@ -22,6 +35,7 @@ const initialState = {
     assignmentErrorMessage: '',
     assignmentList: null,
     assignmentDetails: {},
+    assignmentMembers: {},
 
     activeTab: 'details',
 }
@@ -57,6 +71,27 @@ const assignmentSlice = createSlice({
                 state.isAssignmentLoading = false;
             })
             .addCase(fetchAssignmentDetails.rejected, (state, action) => {
+                state.isAssignmentError = true;
+                state.assignmentErrorMessage = action.payload.error;
+                state.isAssignmentLoading = false;
+            })
+            .addCase(fetchAssignmentMembers.pending, (state) => {
+                state.isAssignmentLoading = true;
+                state.isAssignmentError = false;
+            })
+            .addCase(fetchAssignmentMembers.fulfilled, (state, action) => {
+                if (!state.assignmentMembers) {
+                    state.assignmentMembers = {};
+                }
+                state.assignmentMembers = {
+                    ...state.assignmentMembers,
+                    [action.payload.assignmentId]: action.payload.data
+                };
+                state.isAssignmentError = false;
+                state.assignmentErrorMessage = '';
+                state.isAssignmentLoading = false;
+            })
+            .addCase(fetchAssignmentMembers.rejected, (state, action) => {
                 state.isAssignmentError = true;
                 state.assignmentErrorMessage = action.payload.error;
                 state.isAssignmentLoading = false;
