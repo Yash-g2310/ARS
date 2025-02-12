@@ -1,11 +1,12 @@
 import React from 'react'
+import { useForm } from 'react-hook-form'
 
 const AssignmentCreate = () => {
     return (
         <div className='flex flex-col w-5/6 min-w-[calc(500%/6)] max-w-[calc(500%/6)] h-screen '>
             <div className='w-full h-14 min-h-14 border-b border-gray-500 bg-backg_1 text-light_gray text-left px-4 flex items-center '>
                 <div className='flex flex-row gap-2 items-center'>
-                    <img src="/assets/svg/hashtag.svg" className='w-6 h-6 ' alt="" />
+                    <img src="/assets/svg/assignment_svg.svg" className='w-7 h-7 ' alt="" />
                     <h1 className='font-semibold text-2xl tracking-wide'>
                         Create Assignment
                     </h1>
@@ -18,7 +19,7 @@ const AssignmentCreate = () => {
                 </div>
                 <div className="max-w-[calc(200%/5)] min-w-[calc(200%/5)] h-full overflow-auto [&::-webkit-scrollbar]:hidden">
                     {/* <NotActive /> */}
-                    ji
+                    world
                 </div>
             </div>
         </div>

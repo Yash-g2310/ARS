@@ -75,6 +75,7 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
           subspaces.map((subspace) => (
             subspace.is_member &&
             <div key={subspace.id} className="flex flex-col w-full">
+              {console.log(subspace)}
               <div className="w-full  flex items-center justify-between  bg-[#4E5058]/50 hover:bg-[#4E5058]/70 p-2.5 rounded-md transition-all duration-200 ease-in-out  border border-gray-600/30 hover:border-gray-500/50">
                 <button
                   onClick={() => { handleAssignmentClick(subspace) }}
@@ -108,7 +109,7 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
                   <svg className="w-5 h-5 text-light_gray hover:text-light_white" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                   </svg>
-                  {console.log(subspace)}
+                  {/* {console.log(subspace)} */}
                   <DropdownMenu
                     open={activeMenu === subspace.id}
                     anchorEl={menuButtonRefs.current[subspace.id]}
@@ -120,12 +121,12 @@ const SubspaceSideDrawer = ({ subspaces, spaceDetail, componentState, setCompone
                     >
                       View Details
                     </MenuItem>
-                    <MenuItem
+                    {subspace?.is_reviewer && <MenuItem
                       icon={<AddIcon className="text-light_gray" />}
                       onClick={() => handleCreateAssignment(subspace.id)}
                     >
                       Create Assignment
-                    </MenuItem>
+                    </MenuItem>}
                   </DropdownMenu>
                 </button>
               </div>

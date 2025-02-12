@@ -229,9 +229,10 @@ class SubSpaceCreateSerializer(serializers.ModelSerializer):
     
 class SubSpaceListSerializer(serializers.ModelSerializer):
     is_member = serializers.SerializerMethodField()
+    is_reviewer = serializers.SerializerMethodField()
     class Meta:
         model = SubSpace
-        fields = ['id','sub_space_name','sub_space_bio','create_date','is_member']
+        fields = ['id','sub_space_name','sub_space_bio','create_date','is_member','is_reviewer']
         
     def get_is_member(self,obj):
         request = self.context.get('request')
@@ -243,6 +244,15 @@ class SubSpaceListSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("the user is not member of the space")
         return SubSpaceMember.objects.filter(sub_space= obj, space_member = space_member).exists()
 
+    def get_is_reviewer(self,obj):
+        request = self.context.get('request')
+        user = request.user
+        space_id = self.context.get('space_id')
+        try:
+            space_member = SpaceMember.objects.get(user = user,space = space_id)
+        except SpaceMember.DoesNotExist:
+            raise serializers.ValidationError("the user is not member of the space")
+        return SubSpaceMember.objects.filter(sub_space= obj, space_member = space_member,role = SubSpaceMember.REVIEWER).exists()
 
 class SubSpaceDetailUpdateSerializer(SubSpaceCreateSerializer):
     reviewers_list = serializers.SerializerMethodField(read_only = True)
